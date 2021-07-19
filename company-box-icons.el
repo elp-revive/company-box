@@ -3,7 +3,8 @@
 ;; Copyright (C) 2017 Sebastien Chapuis
 
 ;; Author: Sebastien Chapuis <sebastien@chapu.is>
-;; URL: https://github.com/sebastiencs/company-box
+;; Maintainer: Jen-Chieh Shen <jcs090218@gmail.com>
+;; URL: https://github.com/jcs090218/company-box
 
 ;;; License
 ;;

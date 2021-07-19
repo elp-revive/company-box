@@ -3,7 +3,8 @@
 ;; Copyright (C) 2018 Sebastien Chapuis
 
 ;; Author: Sebastien Chapuis <sebastien@chapu.is>
-;; URL: https://github.com/sebastiencs/company-box
+;; Maintainer: Jen-Chieh Shen <jcs090218@gmail.com>
+;; URL: https://github.com/jcs090218/company-box
 ;; Keywords: company, completion, front-end, convenience
 ;; Package-Requires: ((emacs "26.0.91") (dash "2.18") (company "0.9.6") (frame-local "0.0.1"))
 ;; Version: 0.0.1

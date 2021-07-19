@@ -3,7 +3,8 @@
 ;; Copyright (C) 2018 Sebastien Chapuis
 
 ;; Author: Sebastien Chapuis <sebastien@chapu.is>
-;; URL: https://github.com/sebastiencs/company-box
+;; Maintainer: Jen-Chieh Shen <jcs090218@gmail.com>
+;; URL: https://github.com/jcs090218/company-box
 
 ;;; License
 ;;
@@ -116,7 +117,7 @@
           (append company-box-doc-frame-parameters
                   company-box-frame-parameters))
          (frame (company-box--make-frame buffer)))
-    ;; (set-face-background 'internal-border "white" frame)
+    ;;(set-face-background 'internal-border "white" frame)
     (set-frame-parameter frame 'name "")
     frame))
 
