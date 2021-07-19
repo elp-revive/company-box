@@ -1,4 +1,5 @@
 # company-box
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![CELPA](https://celpa.conao3.com/packages/company-box-badge.svg)](https://celpa.conao3.com/#/company-box)
 [![CI](https://github.com/jcs090218/company-box/actions/workflows/test.yml/badge.svg)](https://github.com/jcs090218/company-box/actions/workflows/test.yml)
 
