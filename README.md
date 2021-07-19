@@ -1,5 +1,6 @@
 # company-box
 [![CELPA](https://celpa.conao3.com/packages/company-box-badge.svg)](https://celpa.conao3.com/#/company-box)
+[![CI](https://github.com/jcs090218/company-box/actions/workflows/test.yml/badge.svg)](https://github.com/jcs090218/company-box/actions/workflows/test.yml)
 
 A company front-end with icons.
 
