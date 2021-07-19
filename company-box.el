@@ -262,7 +262,7 @@ Examples:
     (menu-bar-lines         . 0)
     (tool-bar-lines         . 0)
     (line-spacing           . 0)
-    ;; (unsplittable . nil)
+    ;;(unsplittable . nil)
     (undecorated            . t)
     (top                    . -1)
     (visibility             . nil)
@@ -484,7 +484,7 @@ It doesn't nothing if a font icon is used."
 
 (defun company-box--get-end (point height)
   (next-single-property-change
-   point 'company-box--rendered nil (min (point-max) (+ point height))))
+   point 'company-box--rendered nil (min (point-max) (+ point height -1))))
 
 (defun company-box--render-lines (point &optional no-remove-numbers)
   (when-let* ((height (1+ company-box--chunk-size))
