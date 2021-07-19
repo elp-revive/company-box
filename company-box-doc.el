@@ -30,11 +30,13 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+(require 'cl-macs)
+(require 'subr-x)
+
 (require 'dash)
 (require 'company)
 (require 'frame-local)
-(require 'cl-macs)
-(require 'subr-x)
 
 (defgroup company-box-doc nil
   "Display documentation popups alongside company-box"

@@ -62,12 +62,15 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'subr-x)
+
 (require 'dash)
 (require 'company)
-(require 'company-box-icons)
-(require 'company-box-doc)
 (require 'frame-local)
+
+(require 'company-box-doc)
+(require 'company-box-icons)
 
 (defgroup company-box nil
   "Front-end for Company."
@@ -330,9 +333,10 @@ Examples:
          (> spaces 1))))
 
 (defun company-box--make-scrollbar-parameter nil
-  (cond ((eq company-box-scrollbar 'inherit) (frame-parameter nil 'vertical-scroll-bars))
-        ((eq company-box-scrollbar 'left) 'left)
-        ((eq company-box-scrollbar 'right) 'right)))
+  (cl-case company-box-scrollbar
+    (inherit (frame-parameter nil 'vertical-scroll-bars))
+    (left 'left)
+    (right 'right)))
 
 (defun company-box--make-frame (&optional buf)
   (let* ((after-make-frame-functions nil)
