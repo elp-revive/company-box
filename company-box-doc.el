@@ -51,7 +51,7 @@
   :group 'company-box-doc)
 
 (defvar company-box-doc-frame-parameters
-  '((internal-border-width . 10))
+  '((internal-border-width . 5))
   "Frame parameters to use on the doc frame.
 `company-box-frame-parameters' is then append to this variable.")
 
