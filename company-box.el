@@ -653,11 +653,28 @@ It doesn't nothing if a font icon is used."
       (pop list))
     (or kind 'Unknown)))
 
+(defun company-box--get-icon-size ()
+  "Return the icon size."
+  (cond
+   ((integerp company-icon-size)
+    company-icon-size)
+   ;; XXX: Also consider smooth scaling, e.g. using
+   ;; (aref (font-info (face-font 'default)) 2)
+   ((and (consp company-icon-size)
+         (eq 'auto-scale (car company-icon-size)))
+    (let ((base-size (cdr company-icon-size))
+          (dfh (default-font-height)))
+      (min
+       (if (> dfh (* 2 base-size))
+           (* 2 base-size)
+         base-size)
+       (* 2 (default-font-width)))))))
+
 (defun company-box--get-icon (icon)
   (cond ((listp icon)
          (cond ((eq 'image (car icon))
                 (unless (plist-get icon :height)
-                  (setq icon (append icon `(:height ,(round (* (frame-char-height) 0.90))))))
+                  (setq icon (append icon `(:height ,(company-box--get-icon-size)))))
                 (propertize " " 'display icon 'company-box-image t
                             'display-origin icon))
                ((and company-box-color-icon icon)
@@ -678,14 +695,14 @@ It doesn't nothing if a font icon is used."
            (display-props
             ;; The string already has a display prop, add height to it
             (--> (if (listp (car display-props))
-                     (append display-props '((height 0.95)))
-                   (append `(,display-props) '((height 0.95))))
+                     (append display-props `((height 0.95)))
+                   (append `(,display-props) `((height 0.95))))
                  (put-text-property 0 (length icon-string) 'display it icon-string))
             icon-string)
            (t
             ;; Make sure the string is not bigger than other text.
             ;; It causes invalid computation of the frame size, ..
-            (put-text-property 0 (length icon-string) 'display '((height 0.95)) icon-string)
+            (put-text-property 0 (length icon-string) 'display `((height 0.95)) icon-string)
             icon-string))
      (propertize " " 'display `(space :align-to (+ company-box-icon-right-margin
                                                    left-fringe
