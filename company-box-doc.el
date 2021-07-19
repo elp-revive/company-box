@@ -101,6 +101,7 @@
          (inhibit-modification-hooks t)
          (string (cond ((stringp object) object)
                        ((bufferp object) (with-current-buffer object (buffer-string))))))
+    (setq string (string-trim string))
     (when (and string (> (length (string-trim string)) 0))
       (with-current-buffer (company-box--get-buffer "doc")
         (erase-buffer)
