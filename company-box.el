@@ -1,6 +1,7 @@
 ;;; company-box.el --- Company front-end with icons  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Sebastien Chapuis
+;; Copyright (C) 2021 Jen-Chieh Shen
 
 ;; Author: Sebastien Chapuis <sebastien@chapu.is>
 ;; Maintainer: Jen-Chieh Shen <jcs090218@gmail.com>
