@@ -112,8 +112,11 @@
         (setq mode-line-format nil
               display-line-numbers nil
               header-line-format nil
+              tab-line-format nil
               show-trailing-whitespace nil
               cursor-in-non-selected-windows nil)
+        (when (bound-and-true-p tab-bar-mode)
+          (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
         (current-buffer)))))
 
 (defun company-box-doc--make-frame (buffer)
@@ -124,6 +127,10 @@
     ;;(set-face-background 'internal-border "white" frame)
     (set-frame-parameter frame 'name "")
     frame))
+
+(defun company-box-doc--get-frame (&optional frame)
+  "Return company-box-doc frame in FRAME."
+  (frame-parameter frame 'company-box-doc-frame))
 
 (defun company-box-doc--show (selection frame)
   (cl-letf (((symbol-function 'completing-read) #'company-box-completing-read)

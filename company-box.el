@@ -525,12 +525,15 @@ It doesn't nothing if a font icon is used."
       (unless on-update
         (setq mode-line-format nil
               header-line-format nil
+              tab-line-format nil
               display-line-numbers nil
               truncate-lines t
               show-trailing-whitespace nil
               company-box--parent-buffer buffer
               company-box--first-render t
               cursor-in-non-selected-windows nil)
+        (when (bound-and-true-p tab-bar-mode)
+          (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
         (setq-local scroll-step 1)
         (setq-local scroll-conservatively 100000)
         (setq-local scroll-margin 0)
@@ -911,8 +914,11 @@ It doesn't nothing if a font icon is used."
     (erase-buffer)
     (setq header-line-format nil
           mode-line-format nil
+          tab-line-format nil
           show-trailing-whitespace nil
           cursor-in-non-selected-windows nil)
+    (when (bound-and-true-p tab-bar-mode)
+      (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
     (setq-local window-min-width 2)
     (setq-local window-safe-min-width 2)
     (unless (zerop height-blank)
