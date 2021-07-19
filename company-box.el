@@ -57,7 +57,7 @@
 ;;
 ;;
 ;; For more informations, see the homepage:
-;; https://github.com/sebastiencs/company-box
+;; https://github.com/jcs090218/company-box
 
 ;;; Code:
 
