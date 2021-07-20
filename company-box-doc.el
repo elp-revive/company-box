@@ -32,6 +32,7 @@
 
 (require 'cl-lib)
 (require 'cl-macs)
+(require 'face-remap)
 (require 'subr-x)
 
 (require 'dash)
