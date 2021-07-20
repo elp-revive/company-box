@@ -109,7 +109,7 @@
   (let* ((buffer-list-update-hook nil)
          (inhibit-modification-hooks t)
          (string (cond ((stringp object) object)
-                       ((bufferp object) (with-current-buffer object (buffer-string))))))
+                       ((bufferp object) (company-box--with-buffer-valid object (buffer-string))))))
     (setq string (string-trim string))
     (when (and string (> (length string) 0))
       (company-box--with-buffer "doc"

@@ -255,25 +255,32 @@ Examples:
       (frame-local-setq company-box-buffer-id (or (frame-parameter nil 'window-id)
                                                   (frame-parameter nil 'name)))))
 
-(defmacro company-box--with-buffer (suffix &rest body)
+(defmacro company-box--with-buffer-valid (buffer &rest body)
+  "Execute BODY inside BUFFER and make sure disable read-only."
+  (declare (indent 1) (debug t))
+  `(with-current-buffer ,buffer
+     (let (buffer-read-only) (progn ,@body))))
+
+(defmacro company-box--with-buffer (object &rest body)
   "Execute BODY inside buffer with SUFFIX."
   (declare (indent 1) (debug t))
-  `(with-current-buffer (company-box--get-buffer ,suffix)
-     (buffer-disable-undo)
-     (let (buffer-read-only) (progn ,@body))
-     (setq buffer-read-only nil)  ; TODO: ..
-     (current-buffer)))
+  `(company-box--with-buffer-valid (company-box--get-buffer ,object)
+     (progn ,@body)))
 
 (defmacro company-box--with-buffer-window (suffix &rest body)
   "Execute BODY inside selected window with buffer SUFFIX."
   (declare (indent 1) (debug t))
   `(with-selected-window (get-buffer-window (company-box--get-buffer ,suffix) t)
-     (progn ,@body)))
+     (let (buffer-read-only) (progn ,@body))))
 
 (defun company-box--get-buffer (&optional suffix)
   "Construct the buffer name, it should be unique for each frame."
-  (get-buffer-create
-   (concat " *company-box-" (company-box--get-id) suffix "*")))
+  (with-current-buffer
+      (get-buffer-create
+       (concat " *company-box-" (company-box--get-id) suffix "*"))
+    (setq buffer-read-only t)
+    (buffer-disable-undo)
+    (current-buffer)))
 
 (defun company-box--with-icons-p nil
   (let ((spaces (+ (- (current-column) (string-width company-prefix))
@@ -450,7 +457,7 @@ It doesn't nothing if a font icon is used."
       (delete-region start end)
       (goto-char start)
       (insert
-       (with-current-buffer company-box--parent-buffer
+       (company-box--with-buffer-valid company-box--parent-buffer
          (--> candidates
               (mapcar (-compose 'company-box--make-line 'company-box--make-candidate) it)
               (mapconcat 'identity it "\n")))
@@ -778,7 +785,7 @@ It doesn't nothing if a font icon is used."
 
 (defun company-box--calc-len (buffer start end char-width)
   (let ((max 0))
-    (with-current-buffer buffer
+    (company-box--with-buffer-valid buffer
       (save-excursion
         (goto-char start)
         (while (< (point) end)
@@ -794,11 +801,11 @@ It doesn't nothing if a font icon is used."
         (selection (or company-selection 0))
         (box-buffer (window-buffer win)))
     (if win-start
-        (cons win-start (with-current-buffer box-buffer
+        (cons win-start (company-box--with-buffer-valid box-buffer
                           (company-box--point-at-line height win-start)))
       ;; When window-start is not known, we take the points (selection - height)
       ;; and (selection + height)
-      (with-current-buffer box-buffer
+      (company-box--with-buffer-valid box-buffer
         (let ((start (company-box--point-at-line (- selection height))))
           (cons start (company-box--point-at-line height start)))))))
 
@@ -852,7 +859,7 @@ It doesn't nothing if a font icon is used."
     (ignore-errors (minimize-window))))
 
 (defun company-box--update-scrollbar-buffer (height-blank height-scrollbar percent buffer)
-  (with-current-buffer buffer
+  (company-box--with-buffer-valid buffer
     (erase-buffer)
     (setq header-line-format nil
           mode-line-format nil
