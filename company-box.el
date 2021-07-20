@@ -152,16 +152,6 @@ character (see `frame-char-width'), set `0.5' to get half width of a character."
   :type 'number
   :group 'company-box)
 
-(make-obsolete-variable 'company-box-highlight-prefix nil nil)
-
-(defcustom company-box-highlight-prefix nil
-  "[OBSOLETE] Highlight the prefix instead of common.
-Faces used are `company-tooltip-common' and `company-tooltip-common-selection'
-for both cases."
-  :type 'boolean
-  :safe #'booleanp
-  :group 'company-box)
-
 (defvar company-box-backends-colors
   '((company-yasnippet . (:all "lime green" :selected (:background "lime green" :foreground "black"))))
   "List of colors to use for specific backends.
