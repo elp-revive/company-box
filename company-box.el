@@ -8,7 +8,7 @@
 ;; URL: https://github.com/jcs090218/company-box
 ;; Keywords: company, completion, front-end, convenience
 ;; Package-Requires: ((emacs "26.0.91") (dash "2.18") (company "0.9.6") (frame-local "0.0.1"))
-;; Version: 0.0.1
+;; Version: 0.1.0
 
 ;;; License
 ;;
