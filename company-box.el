@@ -470,23 +470,16 @@ It doesn't nothing if a font icon is used."
               cursor-in-non-selected-windows nil)
         (when (bound-and-true-p tab-bar-mode)
           (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
-        (setq-local scroll-step 1)
-        (setq-local scroll-conservatively 100000)
-        (setq-local scroll-margin 0)
-        (setq-local bidi-display-reordering nil)
-        (setq-local redisplay--inhibit-bidi t)
-        ;; (setq-local next-screen-context-lines 0)
-        (setq-local scroll-preserve-screen-position t)
-        (setq-local fontification-functions nil)
-        (setq-local window-scroll-functions '(company-box--handle-scroll))
-        ;; (setq-local pre-redisplay-function '(company-box--handle-state-changed))
-        ;; (setq-local pre-redisplay-functions '(company-box--handle-state-changed))
-        ;;(setq-local window-state-change-functions '(company-box--handle-state-changed))
-        ;;(setq-local window-state-change-hook '(company-box--handle-state-changed))
-        ;; (setq-local company-box--chunk-size (or 10 (frame-height) 50))
-        ;; (jit-lock-mode 1)
-        (add-hook 'window-configuration-change-hook 'company-box--prevent-changes t t)
-        ))))
+        (setq-local scroll-step 1
+                    scroll-conservatively 100000
+                    scroll-margin 0
+                    bidi-display-reordering nil
+                    redisplay--inhibit-bidi t
+                    ;;next-screen-context-lines 0
+                    scroll-preserve-screen-position t
+                    fontification-functions nil
+                    window-scroll-functions '(company-box--handle-scroll))
+        (add-hook 'window-configuration-change-hook 'company-box--prevent-changes t t)))))
 
 (defvar-local company-box--bottom nil)
 
