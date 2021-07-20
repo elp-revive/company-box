@@ -77,46 +77,10 @@
   :prefix "company-box-"
   :group 'company)
 
-(define-obsolete-face-alias 'company-box-annotation 'company-tooltip-annotation nil)
-(define-obsolete-face-alias 'company-box-selection 'company-tooltip-selection nil)
-(define-obsolete-face-alias 'company-box-background 'company-tooltip nil)
-(define-obsolete-face-alias 'company-box-candidate 'company-tooltip nil)
-(define-obsolete-face-alias 'company-box-numbers 'company-tooltip nil)
-(make-obsolete-variable 'company-box-max-candidates nil "")
-(make-obsolete-variable 'company-box-tooltip-minimum-width 'company-tooltip-minimum-width nil "")
-(make-obsolete-variable 'company-box-tooltip-maximum-width 'company-tooltip-maximum-width nil "")
-
-(defface company-box-candidate
-  '((((background light)) :foreground "black")
-    (t :foreground "white"))
-  "Face used to color candidates."
-  :group 'company-box)
-
-(defface company-box-annotation
-  '((t :inherit company-tooltip-annotation))
-  "Face used to color annotations."
-  :group 'company-box)
-
-(defface company-box-selection
-  '((t :inherit company-tooltip-selection :extend t))
-  "Face used to color the selected candidate."
-  :group 'company-box)
-
-(defface company-box-background
-  '((t :inherit company-tooltip))
-  "Face used for frame's background.
-Only the 'background' color is used in this face."
-  :group 'company-box)
-
 (defface company-box-scrollbar
   '((t :inherit company-tooltip-selection))
   "Face used for the scrollbar.
 Only the 'background' color is used in this face."
-  :group 'company-box)
-
-(defface company-box-numbers
-  '((t :inherit company-box-candidate))
-  "Face used for numbers when `company-show-quick-access' is used."
   :group 'company-box)
 
 (defcustom company-box-color-icon t
@@ -128,23 +92,6 @@ Note that icons from images cannot be colored."
 (defcustom company-box-enable-icon t
   "Whether or not to display icons."
   :type 'boolean
-  :group 'company-box)
-
-(defcustom company-box-max-candidates 100
-  "Maximum number of candidates.
-A big number might slowndown the rendering.
-To change the number of _visible_ chandidates, see `company-tooltip-limit'"
-  :type 'integer
-  :group 'company-box)
-
-(defcustom company-box-tooltip-minimum-width 60
-  "`company-box' minimum width."
-  :type 'integer
-  :group 'company-box)
-
-(defcustom company-box-tooltip-maximum-width 260
-  "`company-box' maximum width."
-  :type 'integer
   :group 'company-box)
 
 (defcustom company-box-show-single-candidate 'always
@@ -468,7 +415,7 @@ It doesn't nothing if a font icon is used."
   (let ((index 0)
         (vector (make-vector (max (- end start) 1) nil)))
     (while (< start end)
-      (-when-let* ((candidate (get-text-property start 'company-box-candidate)))
+      (-when-let* ((candidate (get-text-property start 'company-tooltip)))
         (aset vector index candidate)
         (setq index (1+ index)))
       (setq start (1+ start)))
@@ -813,7 +760,7 @@ It doesn't nothing if a font icon is used."
         company-box--with-icons-p (company-box--with-icons-p))
   (let ((string (make-string company-candidates-length 10)))
     (--each-indexed company-candidates
-      (put-text-property it-index (1+ it-index) 'company-box-candidate it string))
+      (put-text-property it-index (1+ it-index) 'company-tooltip it string))
     (company-box--display string on-update)))
 
 (defvar company-box-hide-hook nil)
