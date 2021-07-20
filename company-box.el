@@ -261,7 +261,8 @@ Examples:
   `(with-current-buffer (company-box--get-buffer ,suffix)
      (buffer-disable-undo)
      (let (buffer-read-only) (progn ,@body))
-     (setq buffer-read-only nil)))  ; TODO: ..
+     (setq buffer-read-only nil)  ; TODO: ..
+     (current-buffer)))
 
 (defmacro company-box--with-buffer-window (suffix &rest body)
   "Execute BODY inside selected window with buffer SUFFIX."
