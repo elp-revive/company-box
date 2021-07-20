@@ -255,10 +255,30 @@ Examples:
       (frame-local-setq company-box-buffer-id (or (frame-parameter nil 'window-id)
                                                   (frame-parameter nil 'name)))))
 
+(defmacro company-box--with-buffer-valid (buffer &rest body)
+  "Execute BODY inside BUFFER and make sure disable read-only."
+  (declare (indent 1) (debug t))
+  `(with-current-buffer ,buffer
+     (let (buffer-read-only) (progn ,@body))))
+
+(defmacro company-box--with-buffer (object &rest body)
+  "Execute BODY inside buffer with SUFFIX."
+  (declare (indent 1) (debug t))
+  `(company-box--with-buffer-valid (company-box--get-buffer ,object)
+     (progn ,@body)))
+
+(defmacro company-box--with-buffer-window (suffix &rest body)
+  "Execute BODY inside selected window with buffer SUFFIX."
+  (declare (indent 1) (debug t))
+  `(with-selected-window (get-buffer-window (company-box--get-buffer ,suffix) t)
+     (let (buffer-read-only) (progn ,@body))))
+
 (defun company-box--get-buffer (&optional suffix)
   "Construct the buffer name, it should be unique for each frame."
-  (with-current-buffer (get-buffer-create
-                        (concat " *company-box-" (company-box--get-id) suffix "*"))
+  (with-current-buffer
+      (get-buffer-create
+       (concat " *company-box-" (company-box--get-id) suffix "*"))
+    (setq buffer-read-only t)
     (buffer-disable-undo)
     (current-buffer)))
 
@@ -437,7 +457,7 @@ It doesn't nothing if a font icon is used."
       (delete-region start end)
       (goto-char start)
       (insert
-       (with-current-buffer company-box--parent-buffer
+       (company-box--with-buffer-valid company-box--parent-buffer
          (--> candidates
               (mapcar (-compose 'company-box--make-line 'company-box--make-candidate) it)
               (mapconcat 'identity it "\n")))
@@ -452,7 +472,7 @@ It doesn't nothing if a font icon is used."
         (with-icons-p company-box--with-icons-p)
         (window-configuration-change-hook nil)
         (buffer-list-update-hook nil))
-    (with-current-buffer (company-box--get-buffer)
+    (company-box--with-buffer nil
       (erase-buffer)
       (insert string)
       (put-text-property (point-min) (point-max) 'company-box--rendered nil)
@@ -546,7 +566,7 @@ It doesn't nothing if a font icon is used."
           company-box--top (+ y top)
           company-box--height height
           company-box--chunk-size (/ height char-height))
-    (with-current-buffer (company-box--get-buffer)
+    (company-box--with-buffer nil
       (setq company-box--x (max (+ x left) 0)
             company-box--top (+ y top)
             company-box--height height
@@ -581,7 +601,7 @@ It doesn't nothing if a font icon is used."
   (unless (frame-visible-p (company-box--get-frame))
     (make-frame-visible (company-box--get-frame)))
   (company-box--update-scrollbar (company-box--get-frame) t)
-  (with-current-buffer (company-box--get-buffer)
+  (company-box--with-buffer nil
     (company-box--maybe-move-number (or company-box--last-start 1))))
 
 (defun company-box--get-kind (candidate)
@@ -758,14 +778,14 @@ It doesn't nothing if a font icon is used."
         company-box--edges nil)
   (-some-> (company-box--get-frame)
     (make-frame-invisible))
-  (with-current-buffer (company-box--get-buffer)
+  (company-box--with-buffer nil
     (setq company-box--last-start nil))
   (remove-hook 'window-scroll-functions 'company-box--handle-scroll-parent t)
   (run-hook-with-args 'company-box-hide-hook (or (frame-parent) (selected-frame))))
 
 (defun company-box--calc-len (buffer start end char-width)
   (let ((max 0))
-    (with-current-buffer buffer
+    (company-box--with-buffer-valid buffer
       (save-excursion
         (goto-char start)
         (while (< (point) end)
@@ -781,11 +801,11 @@ It doesn't nothing if a font icon is used."
         (selection (or company-selection 0))
         (box-buffer (window-buffer win)))
     (if win-start
-        (cons win-start (with-current-buffer box-buffer
+        (cons win-start (company-box--with-buffer-valid box-buffer
                           (company-box--point-at-line height win-start)))
       ;; When window-start is not known, we take the points (selection - height)
       ;; and (selection + height)
-      (with-current-buffer box-buffer
+      (company-box--with-buffer-valid box-buffer
         (let ((start (company-box--point-at-line (- selection height))))
           (cons start (company-box--point-at-line height start)))))))
 
@@ -839,7 +859,7 @@ It doesn't nothing if a font icon is used."
     (ignore-errors (minimize-window))))
 
 (defun company-box--update-scrollbar-buffer (height-blank height-scrollbar percent buffer)
-  (with-current-buffer buffer
+  (company-box--with-buffer-valid buffer
     (erase-buffer)
     (setq header-line-format nil
           mode-line-format nil
@@ -914,7 +934,7 @@ It doesn't nothing if a font icon is used."
         (inhibit-modification-hooks t)
         (buffer-list-update-hook nil)
         (window-configuration-change-hook nil))
-    (with-selected-window (get-buffer-window (company-box--get-buffer) t)
+    (company-box--with-buffer-window nil
       (setq company-selection selection)
       (let ((new-point (company-box--point-at-line selection))
             (buffer-list-update-hook nil)
@@ -1002,7 +1022,7 @@ It doesn't nothing if a font icon is used."
   (let ((posn (event-end company-mouse-event)))
     (when (eq (company-box--get-buffer) (window-buffer (posn-window posn)))
       (setq company-selection
-            (with-current-buffer (company-box--get-buffer)
+            (company-box--with-buffer nil
               (1- (line-number-at-pos (posn-point posn)))))
       (company-box--move-selection)
       ;; success
@@ -1027,7 +1047,7 @@ COMMAND: See `company-frontends'."
 (defun company-box--ensure-full-window-is-rendered (&optional start)
   (let ((window-configuration-change-hook nil)
         (buffer-list-update-hook nil))
-    (with-selected-window (get-buffer-window (company-box--get-buffer) t)
+    (company-box--with-buffer-window nil
       (let* ((start (or start (window-start)))
              (line-end company-box--chunk-size)
              (end (company-box--point-at-line line-end start))
