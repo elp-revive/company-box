@@ -257,8 +257,10 @@ Examples:
 
 (defun company-box--get-buffer (&optional suffix)
   "Construct the buffer name, it should be unique for each frame."
-  (get-buffer-create
-   (concat " *company-box-" (company-box--get-id) suffix "*")))
+  (with-current-buffer (get-buffer-create
+                        (concat " *company-box-" (company-box--get-id) suffix "*"))
+    (buffer-disable-undo)
+    (current-buffer)))
 
 (defun company-box--with-icons-p nil
   (let ((spaces (+ (- (current-column) (string-width company-prefix))
@@ -470,23 +472,16 @@ It doesn't nothing if a font icon is used."
               cursor-in-non-selected-windows nil)
         (when (bound-and-true-p tab-bar-mode)
           (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
-        (setq-local scroll-step 1)
-        (setq-local scroll-conservatively 100000)
-        (setq-local scroll-margin 0)
-        (setq-local bidi-display-reordering nil)
-        (setq-local redisplay--inhibit-bidi t)
-        ;; (setq-local next-screen-context-lines 0)
-        (setq-local scroll-preserve-screen-position t)
-        (setq-local fontification-functions nil)
-        (setq-local window-scroll-functions '(company-box--handle-scroll))
-        ;; (setq-local pre-redisplay-function '(company-box--handle-state-changed))
-        ;; (setq-local pre-redisplay-functions '(company-box--handle-state-changed))
-        ;;(setq-local window-state-change-functions '(company-box--handle-state-changed))
-        ;;(setq-local window-state-change-hook '(company-box--handle-state-changed))
-        ;; (setq-local company-box--chunk-size (or 10 (frame-height) 50))
-        ;; (jit-lock-mode 1)
-        (add-hook 'window-configuration-change-hook 'company-box--prevent-changes t t)
-        ))))
+        (setq-local scroll-step 1
+                    scroll-conservatively 100000
+                    scroll-margin 0
+                    bidi-display-reordering nil
+                    redisplay--inhibit-bidi t
+                    ;;next-screen-context-lines 0
+                    scroll-preserve-screen-position t
+                    fontification-functions nil
+                    window-scroll-functions '(company-box--handle-scroll))
+        (add-hook 'window-configuration-change-hook 'company-box--prevent-changes t t)))))
 
 (defvar-local company-box--bottom nil)
 
@@ -834,16 +829,14 @@ It doesn't nothing if a font icon is used."
     (message "[CHANGES] CURRENT-BUFFER=%s MIN-WIDTH=%s SAFE-MIN-WIDTH=%s MIN-SIZE=%s MIN-SIZE-IGNORE=%s"
              (current-buffer) window-min-width window-safe-min-width
              (window-min-size nil t) (window-min-size nil t t)))
-  (let ((window-min-width 2)
-        (window-safe-min-width 2)
+  (let ((window-resize-pixelwise t)
         (ignore-window-parameters t)
         (current-size (window-size nil t)))
     (when company-box-debug-scrollbar
       (message "[CHANGES] MIN CURRENT-SIZE=%s WIN-MIN-SIZE=%s WIN-PARAMS=%s FRAME-PARAMS=%s HOOKS=%s"
                current-size (window-min-size nil t) (window-parameters) (frame-parameters (company-box--get-frame))
                window-configuration-change-hook))
-    (unless (= current-size 2)
-      (minimize-window))))
+    (ignore-errors (minimize-window))))
 
 (defun company-box--update-scrollbar-buffer (height-blank height-scrollbar percent buffer)
   (with-current-buffer buffer
@@ -853,13 +846,14 @@ It doesn't nothing if a font icon is used."
           tab-line-format nil
           show-trailing-whitespace nil
           cursor-in-non-selected-windows nil)
+    ;; TODO: Don't know why, can't resize it to 1
+    (setq-local window-min-width 2
+                window-safe-min-width 2)
     (when (bound-and-true-p tab-bar-mode)
       (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
-    (setq-local window-min-width 2)
-    (setq-local window-safe-min-width 2)
     (unless (zerop height-blank)
       (insert (propertize " " 'display `(space :align-to right-fringe :height ,height-blank))
-              (propertize "\n" 'face (list :height 1))))
+              (propertize "\n" 'face (list :height height-blank))))
     (setq height-scrollbar (if (= percent 1)
                                ;; Due to float/int casting in the emacs code, there might 1 or 2
                                ;; remainings pixels
@@ -867,7 +861,7 @@ It doesn't nothing if a font icon is used."
                              height-scrollbar))
     (insert (propertize " " 'face (list :background (face-background 'company-box-scrollbar nil t))
                         'display `(space :align-to right-fringe :height ,height-scrollbar)))
-    (add-hook 'window-configuration-change-hook 'company-box--scrollbar-prevent-changes t t)
+    (add-hook 'window-configuration-change-hook 'company-box--scrollbar-prevent-changes nil t)
     (current-buffer)))
 
 (defun company-box--update-scrollbar (frame &optional first)
@@ -875,13 +869,14 @@ It doesn't nothing if a font icon is used."
     (let* ((selection (or company-selection 0))
            (buffer (company-box--get-buffer "-scrollbar"))
            (h-frame company-box--height)
+           (frame-char-height (frame-char-height frame))
            (n-elements company-candidates-length)
            (percent (company-box--percent selection (1- n-elements)))
-           (percent-display (company-box--percent h-frame (* n-elements (frame-char-height frame))))
+           (percent-display (company-box--percent h-frame (* n-elements frame-char-height)))
            (scrollbar-pixels (* h-frame percent-display))
-           (height-scrollbar (/ scrollbar-pixels (frame-char-height frame)))
+           (height-scrollbar (/ scrollbar-pixels frame-char-height))
            (blank-pixels (* (- h-frame scrollbar-pixels) percent))
-           (height-blank (/ blank-pixels (frame-char-height frame)))
+           (height-blank (/ blank-pixels frame-char-height))
            (inhibit-redisplay t)
            (inhibit-eval-during-redisplay t)
            (window-configuration-change-hook nil)
@@ -898,19 +893,13 @@ It doesn't nothing if a font icon is used."
         (setq
          company-box--scrollbar-window
          (with-selected-frame (company-box--get-frame)
-           (let* ((window-min-width 2)
-                  (window-safe-min-width 2)
-                  (window-configuration-change-hook nil)
+           (let* ((window-configuration-change-hook nil)
                   (display-buffer-alist nil)
                   (window-scroll-functions nil))
              (display-buffer-in-side-window
               (company-box--update-scrollbar-buffer height-blank height-scrollbar percent buffer)
-              '((side . right) (window-width . 2))))))
+              '((side . right))))))
         (frame-local-setq company-box-scrollbar (window-buffer company-box--scrollbar-window) frame))))))
-
-;; ;; (message "selection: %s len: %s PERCENT: %s PERCENTS-DISPLAY: %s SIZE-FRAME: %s HEIGHT-S: %s HEIGHT-B: %s h-frame: %s sum: %s"
-;; ;;          selection n-elements percent percent-display height height-scrollbar height-blank height (+ height-scrollbar height-blank))
-;; ;; (message "HEIGHT-S-1: %s HEIGHT-B-1: %s sum: %s" scrollbar-pixels blank-pixels (+ height-scrollbar-1 height-blank-1))
 
 (defun company-box--point-at-line (&optional line start)
   (save-excursion
@@ -950,8 +939,8 @@ It doesn't nothing if a font icon is used."
              (set-window-start nil it))))
     (unless first-render
       (company-box--update-scrollbar (company-box--get-frame) first-render))
-    (run-with-idle-timer 0 nil (lambda nil (run-hook-with-args 'company-box-selection-hook selection
-                                                               (or (frame-parent) (selected-frame)))))))
+    (run-hook-with-args 'company-box-selection-hook selection
+                        (or (frame-parent) (selected-frame)))))
 
 (defun company-box--prevent-changes (&rest _)
   (set-window-margins
@@ -1022,14 +1011,6 @@ It doesn't nothing if a font icon is used."
 (defun company-box-frontend (command)
   "`company-mode' frontend using child-frame.
 COMMAND: See `company-frontends'."
-  ;; (message "\nCOMMMAND: %s last=%s this=%s" command last-command this-command)
-  ;; (message "prefix: %s" company-prefix)
-  ;; (message "candidates: %s" company-candidates)
-  ;; (message "common: %s" company-common)
-  ;; (message "selection: %s" company-selection)
-  ;; (message "point: %s" company-point)
-  ;; (message "search-string: %s" company-search-string)
-  ;;(message "last-command: %s" last-command)
   (cond
    ((eq command 'hide)
     (company-box-hide))
@@ -1041,10 +1022,7 @@ COMMAND: See `company-frontends'."
    ((eq command 'update)
     (company-box--update))
    ((eq command 'select-mouse)
-    (company-box--select-mouse))
-   ;; ((eq command 'post-command)
-   ;;  (company-box--post-command))
-   ))
+    (company-box--select-mouse))))
 
 (defun company-box--ensure-full-window-is-rendered (&optional start)
   (let ((window-configuration-change-hook nil)
@@ -1071,10 +1049,8 @@ COMMAND: See `company-frontends'."
       (company-box--update-frame-position frame))))
 
 (defun company-box--kill-delay (buffer)
-  (run-with-idle-timer
-   0 nil (lambda nil
-           (when (buffer-live-p buffer)
-             (kill-buffer buffer)))))
+  (when (buffer-live-p buffer)
+    (kill-buffer buffer)))
 
 (defun company-box--kill-buffer (frame)
   (company-box--kill-delay (frame-local-getq company-box-buffer frame))
