@@ -901,10 +901,6 @@ It doesn't nothing if a font icon is used."
               '((side . right))))))
         (frame-local-setq company-box-scrollbar (window-buffer company-box--scrollbar-window) frame))))))
 
-;; ;; (message "selection: %s len: %s PERCENT: %s PERCENTS-DISPLAY: %s SIZE-FRAME: %s HEIGHT-S: %s HEIGHT-B: %s h-frame: %s sum: %s"
-;; ;;          selection n-elements percent percent-display height height-scrollbar height-blank height (+ height-scrollbar height-blank))
-;; ;; (message "HEIGHT-S-1: %s HEIGHT-B-1: %s sum: %s" scrollbar-pixels blank-pixels (+ height-scrollbar-1 height-blank-1))
-
 (defun company-box--point-at-line (&optional line start)
   (save-excursion
     (goto-char (or start 1))
