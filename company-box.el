@@ -845,6 +845,7 @@ It doesn't nothing if a font icon is used."
           tab-line-format nil
           show-trailing-whitespace nil
           cursor-in-non-selected-windows nil)
+    ;; Don't know why, can't resize it to 1
     (setq-local window-min-width 2
                 window-safe-min-width 2)
     (when (bound-and-true-p tab-bar-mode)
