@@ -829,7 +829,8 @@ It doesn't nothing if a font icon is used."
     (message "[CHANGES] CURRENT-BUFFER=%s MIN-WIDTH=%s SAFE-MIN-WIDTH=%s MIN-SIZE=%s MIN-SIZE-IGNORE=%s"
              (current-buffer) window-min-width window-safe-min-width
              (window-min-size nil t) (window-min-size nil t t)))
-  (let ((ignore-window-parameters t)
+  (let ((window-resize-pixelwise t)
+        (ignore-window-parameters t)
         (current-size (window-size nil t)))
     (when company-box-debug-scrollbar
       (message "[CHANGES] MIN CURRENT-SIZE=%s WIN-MIN-SIZE=%s WIN-PARAMS=%s FRAME-PARAMS=%s HOOKS=%s"
@@ -845,14 +846,14 @@ It doesn't nothing if a font icon is used."
           tab-line-format nil
           show-trailing-whitespace nil
           cursor-in-non-selected-windows nil)
-    ;; Don't know why, can't resize it to 1
+    ;; TODO: Don't know why, can't resize it to 1
     (setq-local window-min-width 2
                 window-safe-min-width 2)
     (when (bound-and-true-p tab-bar-mode)
       (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
     (unless (zerop height-blank)
       (insert (propertize " " 'display `(space :align-to right-fringe :height ,height-blank))
-              (propertize "\n" 'face (list :height 1))))
+              (propertize "\n" 'face (list :height height-blank))))
     (setq height-scrollbar (if (= percent 1)
                                ;; Due to float/int casting in the emacs code, there might 1 or 2
                                ;; remainings pixels
@@ -868,13 +869,14 @@ It doesn't nothing if a font icon is used."
     (let* ((selection (or company-selection 0))
            (buffer (company-box--get-buffer "-scrollbar"))
            (h-frame company-box--height)
+           (frame-char-height (frame-char-height frame))
            (n-elements company-candidates-length)
            (percent (company-box--percent selection (1- n-elements)))
-           (percent-display (company-box--percent h-frame (* n-elements (frame-char-height frame))))
+           (percent-display (company-box--percent h-frame (* n-elements frame-char-height)))
            (scrollbar-pixels (* h-frame percent-display))
-           (height-scrollbar (/ scrollbar-pixels (frame-char-height frame)))
+           (height-scrollbar (/ scrollbar-pixels frame-char-height))
            (blank-pixels (* (- h-frame scrollbar-pixels) percent))
-           (height-blank (/ blank-pixels (frame-char-height frame)))
+           (height-blank (/ blank-pixels frame-char-height))
            (inhibit-redisplay t)
            (inhibit-eval-during-redisplay t)
            (window-configuration-change-hook nil)
