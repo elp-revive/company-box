@@ -834,16 +834,13 @@ It doesn't nothing if a font icon is used."
     (message "[CHANGES] CURRENT-BUFFER=%s MIN-WIDTH=%s SAFE-MIN-WIDTH=%s MIN-SIZE=%s MIN-SIZE-IGNORE=%s"
              (current-buffer) window-min-width window-safe-min-width
              (window-min-size nil t) (window-min-size nil t t)))
-  (let ((window-min-width 2)
-        (window-safe-min-width 2)
-        (ignore-window-parameters t)
-        (current-size (window-size nil t)))
+  (let* ((ignore-window-parameters t)
+         (current-size (window-size nil t)))
     (when company-box-debug-scrollbar
       (message "[CHANGES] MIN CURRENT-SIZE=%s WIN-MIN-SIZE=%s WIN-PARAMS=%s FRAME-PARAMS=%s HOOKS=%s"
                current-size (window-min-size nil t) (window-parameters) (frame-parameters (company-box--get-frame))
                window-configuration-change-hook))
-    (unless (= current-size 2)
-      (minimize-window))))
+    (minimize-window)))
 
 (defun company-box--update-scrollbar-buffer (height-blank height-scrollbar percent buffer)
   (with-current-buffer buffer
@@ -855,8 +852,6 @@ It doesn't nothing if a font icon is used."
           cursor-in-non-selected-windows nil)
     (when (bound-and-true-p tab-bar-mode)
       (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
-    (setq-local window-min-width 2)
-    (setq-local window-safe-min-width 2)
     (unless (zerop height-blank)
       (insert (propertize " " 'display `(space :align-to right-fringe :height ,height-blank))
               (propertize "\n" 'face (list :height 1))))
@@ -898,14 +893,12 @@ It doesn't nothing if a font icon is used."
         (setq
          company-box--scrollbar-window
          (with-selected-frame (company-box--get-frame)
-           (let* ((window-min-width 2)
-                  (window-safe-min-width 2)
-                  (window-configuration-change-hook nil)
+           (let* ((window-configuration-change-hook nil)
                   (display-buffer-alist nil)
                   (window-scroll-functions nil))
              (display-buffer-in-side-window
               (company-box--update-scrollbar-buffer height-blank height-scrollbar percent buffer)
-              '((side . right) (window-width . 2))))))
+              '((side . right))))))
         (frame-local-setq company-box-scrollbar (window-buffer company-box--scrollbar-window) frame))))))
 
 ;; ;; (message "selection: %s len: %s PERCENT: %s PERCENTS-DISPLAY: %s SIZE-FRAME: %s HEIGHT-S: %s HEIGHT-B: %s h-frame: %s sum: %s"
@@ -950,8 +943,8 @@ It doesn't nothing if a font icon is used."
              (set-window-start nil it))))
     (unless first-render
       (company-box--update-scrollbar (company-box--get-frame) first-render))
-    (run-with-idle-timer 0 nil (lambda nil (run-hook-with-args 'company-box-selection-hook selection
-                                                               (or (frame-parent) (selected-frame)))))))
+    (run-hook-with-args 'company-box-selection-hook selection
+                        (or (frame-parent) (selected-frame)))))
 
 (defun company-box--prevent-changes (&rest _)
   (set-window-margins
@@ -1022,14 +1015,6 @@ It doesn't nothing if a font icon is used."
 (defun company-box-frontend (command)
   "`company-mode' frontend using child-frame.
 COMMAND: See `company-frontends'."
-  ;; (message "\nCOMMMAND: %s last=%s this=%s" command last-command this-command)
-  ;; (message "prefix: %s" company-prefix)
-  ;; (message "candidates: %s" company-candidates)
-  ;; (message "common: %s" company-common)
-  ;; (message "selection: %s" company-selection)
-  ;; (message "point: %s" company-point)
-  ;; (message "search-string: %s" company-search-string)
-  ;;(message "last-command: %s" last-command)
   (cond
    ((eq command 'hide)
     (company-box-hide))
@@ -1041,10 +1026,7 @@ COMMAND: See `company-frontends'."
    ((eq command 'update)
     (company-box--update))
    ((eq command 'select-mouse)
-    (company-box--select-mouse))
-   ;; ((eq command 'post-command)
-   ;;  (company-box--post-command))
-   ))
+    (company-box--select-mouse))))
 
 (defun company-box--ensure-full-window-is-rendered (&optional start)
   (let ((window-configuration-change-hook nil)
