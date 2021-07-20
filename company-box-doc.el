@@ -113,8 +113,10 @@
     (setq string (string-trim string))
     (when (and string (> (length string) 0))
       (with-current-buffer (company-box--get-buffer "doc")
-        (erase-buffer)
-        (insert string)
+        (setq buffer-read-only t)
+        (let (buffer-read-only)
+          (erase-buffer)
+          (insert string))
         (let ((text-scale-mode-step 1.1))
           (text-scale-set company-box-doc-text-scale-level))
         (setq mode-line-format nil
