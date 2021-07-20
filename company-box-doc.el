@@ -53,6 +53,11 @@
   :type 'number
   :group 'company-box-doc)
 
+(defcustom company-box-doc-text-scale-level 0
+  "Text scale amount for doc buffer."
+  :type 'integer
+  :group 'company-box-doc)
+
 (defvar company-box-doc-frame-parameters
   '((internal-border-width . 10))
   "Frame parameters to use on the doc frame.
@@ -109,6 +114,8 @@
       (with-current-buffer (company-box--get-buffer "doc")
         (erase-buffer)
         (insert string)
+        (let ((text-scale-mode-step 1.1))
+          (text-scale-set company-box-doc-text-scale-level))
         (setq mode-line-format nil
               display-line-numbers nil
               header-line-format nil
