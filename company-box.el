@@ -257,8 +257,10 @@ Examples:
 
 (defun company-box--get-buffer (&optional suffix)
   "Construct the buffer name, it should be unique for each frame."
-  (get-buffer-create
-   (concat " *company-box-" (company-box--get-id) suffix "*")))
+  (with-current-buffer (get-buffer-create
+                        (concat " *company-box-" (company-box--get-id) suffix "*"))
+    (buffer-disable-undo)
+    (current-buffer)))
 
 (defun company-box--with-icons-p nil
   (let ((spaces (+ (- (current-column) (string-width company-prefix))
@@ -827,13 +829,13 @@ It doesn't nothing if a font icon is used."
     (message "[CHANGES] CURRENT-BUFFER=%s MIN-WIDTH=%s SAFE-MIN-WIDTH=%s MIN-SIZE=%s MIN-SIZE-IGNORE=%s"
              (current-buffer) window-min-width window-safe-min-width
              (window-min-size nil t) (window-min-size nil t t)))
-  (let* ((ignore-window-parameters t)
-         (current-size (window-size nil t)))
+  (let ((ignore-window-parameters t)
+        (current-size (window-size nil t)))
     (when company-box-debug-scrollbar
       (message "[CHANGES] MIN CURRENT-SIZE=%s WIN-MIN-SIZE=%s WIN-PARAMS=%s FRAME-PARAMS=%s HOOKS=%s"
                current-size (window-min-size nil t) (window-parameters) (frame-parameters (company-box--get-frame))
                window-configuration-change-hook))
-    (minimize-window)))
+    (ignore-errors (minimize-window))))
 
 (defun company-box--update-scrollbar-buffer (height-blank height-scrollbar percent buffer)
   (with-current-buffer buffer
@@ -843,6 +845,8 @@ It doesn't nothing if a font icon is used."
           tab-line-format nil
           show-trailing-whitespace nil
           cursor-in-non-selected-windows nil)
+    (setq-local window-min-width 2
+                window-safe-min-width 2)
     (when (bound-and-true-p tab-bar-mode)
       (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
     (unless (zerop height-blank)
@@ -855,7 +859,7 @@ It doesn't nothing if a font icon is used."
                              height-scrollbar))
     (insert (propertize " " 'face (list :background (face-background 'company-box-scrollbar nil t))
                         'display `(space :align-to right-fringe :height ,height-scrollbar)))
-    (add-hook 'window-configuration-change-hook 'company-box--scrollbar-prevent-changes t t)
+    (add-hook 'window-configuration-change-hook 'company-box--scrollbar-prevent-changes nil t)
     (current-buffer)))
 
 (defun company-box--update-scrollbar (frame &optional first)
