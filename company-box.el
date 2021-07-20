@@ -1053,10 +1053,8 @@ COMMAND: See `company-frontends'."
       (company-box--update-frame-position frame))))
 
 (defun company-box--kill-delay (buffer)
-  (run-with-idle-timer
-   0 nil (lambda nil
-           (when (buffer-live-p buffer)
-             (kill-buffer buffer)))))
+  (when (buffer-live-p buffer)
+    (kill-buffer buffer)))
 
 (defun company-box--kill-buffer (frame)
   (company-box--kill-delay (frame-local-getq company-box-buffer frame))
