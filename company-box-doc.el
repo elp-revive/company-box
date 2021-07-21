@@ -5,7 +5,6 @@
 
 ;; Author: Sebastien Chapuis <sebastien@chapu.is>
 ;; Maintainer: Jen-Chieh Shen <jcs090218@gmail.com>
-;; URL: https://github.com/elp-revive/company-box
 
 ;;; License
 ;;
