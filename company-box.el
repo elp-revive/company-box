@@ -5,7 +5,7 @@
 
 ;; Author: Sebastien Chapuis <sebastien@chapu.is>
 ;; Maintainer: Jen-Chieh Shen <jcs090218@gmail.com>
-;; URL: https://github.com/jcs090218/company-box
+;; URL: https://github.com/elp-revive/company-box
 ;; Keywords: company, completion, front-end, convenience
 ;; Package-Requires: ((emacs "26.0.91") (dash "2.18") (company "0.9.6") (frame-local "0.0.1"))
 ;; Version: 0.1.0
@@ -58,7 +58,7 @@
 ;;
 ;;
 ;; For more informations, see the homepage:
-;; https://github.com/jcs090218/company-box
+;; https://github.com/elp-revive/company-box
 
 ;;; Code:
 
