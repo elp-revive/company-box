@@ -5,7 +5,7 @@
 
 A company front-end with icons.
 
-![company-box](company-box.png)
+![company-box](etc/company-box.png)
 
 Differences with the built-in front-end:
 - Differents colors for differents backends.
