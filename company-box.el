@@ -1086,7 +1086,7 @@ COMMAND: See `company-frontends'."
 (defun company-box--dimmer-hide (&rest _)
   (frame-local-setq company-box--dimmer-parent nil))
 
-(defun company-box--tweak-external-packages nil
+(defun company-box--tweak-external-packages ()
   (with-eval-after-load 'dimmer
     (when (boundp 'dimmer-prevent-dimming-predicates)
       (add-to-list
@@ -1102,7 +1102,22 @@ COMMAND: See `company-frontends'."
     (when (boundp 'golden-ratio-exclude-buffer-regexp)
       (add-to-list 'golden-ratio-exclude-buffer-regexp " *company-box"))))
 
+(defun company-box--enable-theme (&rest _)
+  "Update frame after theme changed."
+  (when (bound-and-true-p company-box-mode)
+    (when-let ((frame (company-box--get-frame)))
+      (with-selected-frame frame
+        (set-foreground-color (face-foreground 'company-tooltip nil t))
+        (set-background-color (face-background 'company-tooltip nil t))))
+    (when-let ((frame (company-box-doc--get-frame)))
+      (with-selected-frame frame
+        (when-let ((fg (assoc 'foreground-color company-box-doc-frame-parameters)))
+          (set-foreground-color (cdr fg)))
+        (when-let ((bg (assoc 'background-color company-box-doc-frame-parameters)))
+          (set-background-color (cdr bg)))))))
+
 (defun company-box--set-mode (&optional frame)
+  "Initialize entry."
   (cond
    ((and (bound-and-true-p company-box-mode) (not (display-graphic-p frame)))
     (company-box-mode -1))
@@ -1117,7 +1132,8 @@ COMMAND: See `company-frontends'."
     (add-to-list 'company-frontends 'company-box-frontend)
     (unless (assq 'company-box-frame frameset-filter-alist)
       (push '(company-box-doc-frame . :never) frameset-filter-alist)
-      (push '(company-box-frame . :never) frameset-filter-alist)))
+      (push '(company-box-frame . :never) frameset-filter-alist))
+    (advice-add 'enable-theme :after #'company-box--enable-theme))
    ((memq 'company-box-frontend company-frontends)
     (setq company-frontends (delq 'company-box-frontend  company-frontends))
     (add-to-list 'company-frontends 'company-pseudo-tooltip-unless-just-one-frontend))))
