@@ -139,6 +139,11 @@ If all functions returns nil, `company-box-icons-unknown' is used.
                  (const :tag "No scrollbar" nil))
   :group 'company-box)
 
+(defcustom company-box-scrollbar-width 2
+  "Width of the scrollbar."
+  :type 'integer
+  :group 'company-box)
+
 (defcustom company-box-frame-behavior 'default
   "Change frame position behavior."
   :type '(choice (const :tag "Default" 'default)
@@ -867,8 +872,8 @@ It doesn't nothing if a font icon is used."
           show-trailing-whitespace nil
           cursor-in-non-selected-windows nil)
     ;; TODO: Don't know why, can't resize it to 1
-    (setq-local window-min-width 2
-                window-safe-min-width 2)
+    (setq-local window-min-width company-box-scrollbar-width
+                window-safe-min-width company-box-scrollbar-width)
     (when (bound-and-true-p tab-bar-mode)
       (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
     (unless (zerop height-blank)
@@ -918,7 +923,7 @@ It doesn't nothing if a font icon is used."
                  (window-scroll-functions nil))
              (display-buffer-in-side-window
               (company-box--update-scrollbar-buffer height-blank height-scrollbar percent buffer)
-              '((side . right) (window-width . 2))))))
+              `((side . right) (window-width . ,company-box-scrollbar-width))))))
         (frame-local-setq company-box-scrollbar (window-buffer company-box--scrollbar-window) frame))))))
 
 (defun company-box--point-at-line (&optional line start)
