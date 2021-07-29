@@ -140,7 +140,7 @@
 
 (defun company-box-doc--get-frame (&optional frame)
   "Return company-box-doc frame in FRAME."
-  (frame-parameter frame 'company-box-doc-frame))
+  (frame-local-getq company-box-doc-frame))
 
 (defun company-box-doc--show (selection frame)
   (cl-letf (((symbol-function 'completing-read) #'company-box-completing-read)
