@@ -138,8 +138,8 @@
     (set-frame-parameter frame 'name "")
     frame))
 
-(defun company-box-doc--get-frame (&optional frame)
-  "Return company-box-doc frame in FRAME."
+(defun company-box-doc--get-frame ()
+  "Return company-box-doc frame."
   (frame-local-getq company-box-doc-frame))
 
 (defun company-box-doc--show (selection frame)
