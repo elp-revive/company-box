@@ -913,12 +913,12 @@ It doesn't nothing if a font icon is used."
         (setq
          company-box--scrollbar-window
          (with-selected-frame (company-box--get-frame)
-           (let* ((window-configuration-change-hook nil)
-                  (display-buffer-alist nil)
-                  (window-scroll-functions nil))
+           (let ((window-configuration-change-hook nil)
+                 (display-buffer-alist nil)
+                 (window-scroll-functions nil))
              (display-buffer-in-side-window
               (company-box--update-scrollbar-buffer height-blank height-scrollbar percent buffer)
-              '((side . right))))))
+              '((side . right) (window-width . 2))))))
         (frame-local-setq company-box-scrollbar (window-buffer company-box--scrollbar-window) frame))))))
 
 (defun company-box--point-at-line (&optional line start)
