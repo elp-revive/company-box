@@ -11,6 +11,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 * Fix scrollbar movement in the first line
 * Add read-only
 * Ensure no tab-line
+* Add customize variable, scrollbar width
 
 ## 0.0.1
 > Released Jul 19, 2021
