@@ -171,8 +171,7 @@ just grab the first candidate and press forward."
 
 (defun company-box-doc (selection frame)
   (when company-box-doc-enable
-    (-some-> (frame-local-getq company-box-doc-frame frame)
-      (make-frame-invisible))
+    (company-box-doc--hide frame)
     (when (timerp company-box-doc--timer)
       (cancel-timer company-box-doc--timer))
     (setq company-box-doc--timer
@@ -183,8 +182,10 @@ just grab the first candidate and press forward."
              (company-ensure-emulation-alist))))))
 
 (defun company-box-doc--hide (frame)
-  (-some-> (frame-local-getq company-box-doc-frame frame)
-    (make-frame-invisible)))
+  "Hide the doc FRAME."
+  (when-let* ((local-frame (frame-local-getq company-box-doc-frame frame))
+              ((frame-visible-p local-frame)))
+    (make-frame-invisible local-frame)))
 
 (defun company-box-doc-manually ()
   (interactive)
