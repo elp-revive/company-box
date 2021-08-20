@@ -287,7 +287,7 @@ Examples:
     (buffer-disable-undo)
     (current-buffer)))
 
-(defun company-box--with-icons-p nil
+(defun company-box--with-icons-p ()
   (let ((spaces (+ (- (current-column) (string-width company-prefix))
                    (/ (or (car (nth 2 (posn-at-point (line-beginning-position)))) 0)
                       (frame-char-width))
@@ -296,7 +296,7 @@ Examples:
     (and company-box-enable-icon
          (> spaces 1))))
 
-(defun company-box--make-scrollbar-parameter nil
+(defun company-box--make-scrollbar-parameter ()
   (cl-case company-box-scrollbar
     (inherit (frame-parameter nil 'vertical-scroll-bars))
     (left 'left)
@@ -324,11 +324,11 @@ Examples:
     (set-frame-parameter frame 'name "")
     frame))
 
-(defun company-box--get-ov nil
+(defun company-box--get-ov ()
   (or company-box--ov
       (setq company-box--ov (make-overlay 1 1))))
 
-(defun company-box--get-ov-common nil
+(defun company-box--get-ov-common ()
   (or company-box--ov-common
       (setq company-box--ov-common (make-overlay 1 1))))
 
@@ -394,7 +394,7 @@ It doesn't nothing if a font icon is used."
     (company-box--maybe-move-number new-start)
     (company-box--set-width new-start)))
 
-(defun company-box--move-overlay-no-selection nil
+(defun company-box--move-overlay-no-selection ()
   (goto-char 1)
   (move-overlay (company-box--get-ov) 1 1)
   (move-overlay (company-box--get-ov-common) 1 1))
@@ -510,7 +510,7 @@ It doesn't nothing if a font icon is used."
 
 (defvar-local company-box--bottom nil)
 
-(defun company-box--point-bottom nil
+(defun company-box--point-bottom ()
   (or company-box--bottom
       (setq company-box--bottom
             (let* ((win (let ((tmp nil))
@@ -525,14 +525,14 @@ It doesn't nothing if a font icon is used."
 (defvar-local company-box--prefix-pos nil)
 (defvar-local company-box--edges nil)
 
-(defun company-box--prefix-pos nil
+(defun company-box--prefix-pos ()
   (if (eq company-box-frame-behavior 'point)
       (nth 2 (posn-at-point (point)))
     (or company-box--prefix-pos
         (setq company-box--prefix-pos
               (nth 2 (posn-at-point (- (point) (length company-prefix))))))))
 
-(defun company-box--edges nil
+(defun company-box--edges ()
   (or company-box--edges
       (setq company-box--edges (window-edges nil t nil t))))
 
@@ -705,7 +705,7 @@ It doesn't nothing if a font icon is used."
     (add-text-properties 0 (length string) '(company-box--candidate-string t) string)
     string))
 
-(defun company-box--make-number-prop nil
+(defun company-box--make-number-prop ()
   (let ((side (if (eq company-show-quick-access 'left) 'left-margin 'right-margin)))
     (propertize " " 'company-box--number-pos t 'display `((margin ,side) "  "))))
 
@@ -775,14 +775,14 @@ It doesn't nothing if a font icon is used."
 
 (defvar company-box-hide-hook nil)
 
-(defun company-box-hide nil
+(defun company-box-hide ()
   (setq company-box--bottom nil
         company-box--x nil
         company-box--prefix-pos nil
         company-box--last-start nil
         company-box--edges nil)
-  (-some-> (company-box--get-frame)
-    (make-frame-invisible))
+  (when-let ((local-frame (company-box--get-frame)))
+    (make-frame-invisible local-frame))
   (company-box--with-buffer nil
     (setq company-box--last-start nil))
   (remove-hook 'window-scroll-functions 'company-box--handle-scroll-parent t)
@@ -986,14 +986,14 @@ It doesn't nothing if a font icon is used."
            ;; See the docstring of `select-window'
            (run-with-idle-timer 0 nil (lambda nil (company-box--handle-window-changes t)))))))
 
-(defun company-box--hide-single-candidate nil
+(defun company-box--hide-single-candidate ()
   (or (eq company-box-show-single-candidate 'never)
       (and (eq company-box-show-single-candidate 'when-no-other-frontend)
            (cdr company-frontends))))
 
 (defvar-local company-box--state nil)
 
-(defun company-box--save nil
+(defun company-box--save ()
   (setq company-box--state
         (list company-prefix
               company-common
@@ -1002,7 +1002,7 @@ It doesn't nothing if a font icon is used."
               ;; company-candidates
               )))
 
-(defun company-box--update nil
+(defun company-box--update ()
   (-let* (((prefix common search length) company-box--state)
           (frame (company-box--get-frame))
           (window-configuration-change-hook nil)
@@ -1022,6 +1022,7 @@ It doesn't nothing if a font icon is used."
     (setq company-box--parent-start new-start)))
 
 (defvar company-mouse-event)
+
 (defun company-box--select-mouse ()
   "Select the candidate from `company-mouse-event'."
   (let ((posn (event-end company-mouse-event)))
@@ -1061,7 +1062,7 @@ COMMAND: See `company-frontends'."
           (unless (get-text-property (- end (1+ index)) 'company-box--rendered)
             (company-box--render-lines (- end (1+ index)) t)))))))
 
-(defun company-box--on-start-change nil
+(defun company-box--on-start-change ()
   (setq company-box--prefix-pos nil
         company-box--edges nil)
   (let ((frame (company-box--get-frame))
