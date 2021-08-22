@@ -147,7 +147,7 @@
       (Method . ,(company-box-icons-image "Method.png"))
       (Function . ,(company-box-icons-image "Method.png"))
       (Constructor . ,(company-box-icons-image "Method.png"))
-      (Field . ,(company-box-icons-image "Field.png"))
+      (Field . ,(company-box-icons-image "LocalVariable.png"))
       (Variable . ,(company-box-icons-image "Field.png"))
       (Class . ,(company-box-icons-image "Class.png"))
       (Interface . ,(company-box-icons-image "Interface.png"))
