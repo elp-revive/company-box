@@ -762,6 +762,7 @@ It doesn't nothing if a font icon is used."
 (defvar-local company-box--parent-start nil)
 
 (defun company-box-show (&optional on-update)
+  "Show the completion window."
   (unless on-update
     (setq company-box--parent-start (window-start))
     (add-hook 'window-scroll-functions 'company-box--handle-scroll-parent nil t))
@@ -776,6 +777,7 @@ It doesn't nothing if a font icon is used."
 (defvar company-box-hide-hook nil)
 
 (defun company-box-hide ()
+  "Hide the completion window."
   (setq company-box--bottom nil
         company-box--x nil
         company-box--prefix-pos nil
@@ -994,6 +996,7 @@ It doesn't nothing if a font icon is used."
 (defvar-local company-box--state nil)
 
 (defun company-box--save ()
+  "Save state for `company-mode'."
   (setq company-box--state
         (list company-prefix
               company-common
