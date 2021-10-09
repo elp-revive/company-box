@@ -439,8 +439,6 @@ It doesn't nothing if a font icon is used."
     ;; Return nil when the vector is empty
     (and (aref vector 0) vector)))
 
-(defvar-local company-box--first-render nil)
-
 (defun company-box--get-start (point height)
   (previous-single-property-change
    (1+ point) 'company-box--rendered nil (max 1 (- point height))))
@@ -481,8 +479,7 @@ It doesn't nothing if a font icon is used."
       (erase-buffer)
       (insert string)
       (put-text-property (point-min) (point-max) 'company-box--rendered nil)
-      (setq company-box--first-render t
-            company-candidates-length candidates-length
+      (setq company-candidates-length candidates-length
             company-show-quick-access show-numbers
             company-box--with-icons-p with-icons-p)
       (unless on-update
@@ -493,7 +490,6 @@ It doesn't nothing if a font icon is used."
               truncate-lines t
               show-trailing-whitespace nil
               company-box--parent-buffer buffer
-              company-box--first-render t
               cursor-in-non-selected-windows nil)
         (when (bound-and-true-p tab-bar-mode)
           (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
