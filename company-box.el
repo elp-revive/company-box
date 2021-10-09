@@ -599,8 +599,9 @@ It doesn't nothing if a font icon is used."
   (company-box--compute-frame-position (company-box--get-frame))
   (company-box--move-selection t)
   (company-box--update-frame-position (company-box--get-frame))
-  (unless (frame-visible-p (company-box--get-frame))
-    (make-frame-visible (company-box--get-frame)))
+  (when-let* ((local-frame (company-box--get-frame))
+              ((not (frame-visible-p (company-box--get-frame)))))
+    (make-frame-visible local-frame))
   (company-box--update-scrollbar (company-box--get-frame) t)
   (company-box--with-buffer nil
     (company-box--maybe-move-number (or company-box--last-start 1))))
@@ -1036,14 +1037,14 @@ It doesn't nothing if a font icon is used."
 (defun company-box-frontend (command)
   "`company-mode' frontend using child-frame.
 COMMAND: See `company-frontends'."
-  (cond
-   ((eq command 'hide) (company-box-hide))
-   ((and (equal company-candidates-length 1)
-         (company-box--hide-single-candidate))
-    (company-box-hide))
-   ((eq command 'show) (company-box-show))
-   ((eq command 'update) (company-box--update))
-   ((eq command 'select-mouse) (company-box--select-mouse))))
+  (if (and (equal company-candidates-length 1)
+           (company-box--hide-single-candidate))
+      (company-box-hide)
+    (cl-case command
+      (`hide (company-box-hide))
+      (`show (company-box-show))
+      (`update (company-box--update))
+      (`select-mouse (company-box--select-mouse)))))
 
 (defun company-box--ensure-full-window-is-rendered (&optional start)
   (let ((window-configuration-change-hook nil)
