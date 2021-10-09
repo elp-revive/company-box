@@ -606,8 +606,7 @@ It doesn't nothing if a font icon is used."
     (company-box--maybe-move-number (or company-box--last-start 1))))
 
 (defun company-box--get-kind (candidate)
-  (let ((list company-box-icons-functions)
-        kind)
+  (let ((list company-box-icons-functions) kind)
     (while (and (null kind) list)
       (setq kind (funcall (car list) candidate))
       (pop list))
@@ -779,7 +778,8 @@ It doesn't nothing if a font icon is used."
         company-box--prefix-pos nil
         company-box--last-start nil
         company-box--edges nil)
-  (when-let ((local-frame (company-box--get-frame)))
+  (when-let* ((local-frame (company-box--get-frame))
+              (frame-visible-p local-frame))
     (make-frame-invisible local-frame))
   (company-box--with-buffer nil
     (setq company-box--last-start nil))
@@ -1037,17 +1037,13 @@ It doesn't nothing if a font icon is used."
   "`company-mode' frontend using child-frame.
 COMMAND: See `company-frontends'."
   (cond
-   ((eq command 'hide)
-    (company-box-hide))
+   ((eq command 'hide) (company-box-hide))
    ((and (equal company-candidates-length 1)
          (company-box--hide-single-candidate))
     (company-box-hide))
-   ((eq command 'show)
-    (company-box-show))
-   ((eq command 'update)
-    (company-box--update))
-   ((eq command 'select-mouse)
-    (company-box--select-mouse))))
+   ((eq command 'show) (company-box-show))
+   ((eq command 'update) (company-box--update))
+   ((eq command 'select-mouse) (company-box--select-mouse))))
 
 (defun company-box--ensure-full-window-is-rendered (&optional start)
   (let ((window-configuration-change-hook nil)
