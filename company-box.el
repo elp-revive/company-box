@@ -594,8 +594,6 @@ It doesn't nothing if a font icon is used."
 (defun company-box--display (string on-update)
   "Display the completions."
   (company-box--render-buffer string on-update)
-  (unless (company-box--get-frame)
-    (company-box--set-frame (company-box--make-frame)))
   (company-box--compute-frame-position (company-box--get-frame))
   (company-box--move-selection t)
   (company-box--update-frame-position (company-box--get-frame))
@@ -777,6 +775,7 @@ It doesn't nothing if a font icon is used."
   (if-let ((local-frame (company-box--get-frame)))
       (if show (make-frame-visible local-frame)
         (make-frame-invisible local-frame))
+    (company-box--set-frame (company-box--make-frame))
     (company-box--start-frame-timer show)))
 
 (defun company-box--start-frame-timer (show)
