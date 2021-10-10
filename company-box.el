@@ -275,8 +275,10 @@ Examples:
 (defmacro company-box--with-buffer-window (suffix &rest body)
   "Execute BODY inside selected window with buffer SUFFIX."
   (declare (indent 1) (debug t))
-  `(with-selected-window (get-buffer-window (company-box--get-buffer ,suffix) t)
-     (let (buffer-read-only) (progn ,@body))))
+  `(when-let* ((buf-name (company-box--get-buffer ,suffix))
+               (window (get-buffer-window buf-name t))
+               ((window-live-p window)))
+     (with-selected-window window (let (buffer-read-only) (progn ,@body)))))
 
 (defun company-box--get-buffer (&optional suffix)
   "Construct the buffer name, it should be unique for each frame."
@@ -594,6 +596,8 @@ It doesn't nothing if a font icon is used."
 (defun company-box--display (string on-update)
   "Display the completions."
   (company-box--render-buffer string on-update)
+  (unless (company-box--get-frame)
+    (company-box--set-frame (company-box--make-frame)))
   (company-box--compute-frame-position (company-box--get-frame))
   (company-box--move-selection t)
   (company-box--update-frame-position (company-box--get-frame))
@@ -772,11 +776,13 @@ It doesn't nothing if a font icon is used."
 
 (defun company-box--frame-show (show)
   "If SHOW is non-nil, make the frame visible; otherwise make it invisible."
-  (if-let ((local-frame (company-box--get-frame)))
+  (if-let* ((local-frame (company-box--get-frame))
+            ((frame-live-p local-frame)))
       (let ((frame-visible (frame-visible-p local-frame)))
         (if show (unless frame-visible (make-frame-visible local-frame))
           (when frame-visible (make-frame-invisible local-frame))))
-    (company-box--set-frame (company-box--make-frame))
+    (unless local-frame
+      (company-box--set-frame (company-box--make-frame)))
     (company-box--start-frame-timer show)))
 
 (defun company-box--start-frame-timer (show)
