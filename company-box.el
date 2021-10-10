@@ -773,8 +773,9 @@ It doesn't nothing if a font icon is used."
 (defun company-box--frame-show (show)
   "If SHOW is non-nil, make the frame visible; otherwise make it invisible."
   (if-let ((local-frame (company-box--get-frame)))
-      (if show (make-frame-visible local-frame)
-        (make-frame-invisible local-frame))
+      (let ((frame-visible (frame-visible-p local-frame)))
+        (if show (unless frame-visible (make-frame-visible local-frame))
+          (when frame-visible (make-frame-invisible local-frame))))
     (company-box--set-frame (company-box--make-frame))
     (company-box--start-frame-timer show)))
 
