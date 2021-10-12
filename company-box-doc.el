@@ -175,7 +175,7 @@ just grab the first candidate and press forward."
     (when (timerp company-box-doc--timer)
       (cancel-timer company-box-doc--timer))
     (setq company-box-doc--timer
-          (run-with-timer
+          (run-with-idle-timer
            company-box-doc-delay nil
            (lambda nil
              (company-box-doc--show selection frame)
