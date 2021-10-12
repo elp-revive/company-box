@@ -280,6 +280,11 @@ Examples:
                ((window-live-p window)))
      (with-selected-window window (let (buffer-read-only) (progn ,@body)))))
 
+(defmacro company-box--width-selected-frame (frame  &rest body)
+  "Execute BODY inside a selected frame."
+  (declare (indent 1) (debug t))
+  `(when-let (((frame-live-p frame))) (with-selected-frame frame (progn ,@body))))
+
 (defun company-box--get-buffer (&optional suffix)
   "Construct the buffer name, it should be unique for each frame."
   (with-current-buffer
@@ -288,6 +293,11 @@ Examples:
     (setq buffer-read-only t)
     (buffer-disable-undo)
     (current-buffer)))
+
+(defun company-box--line-height (&optional frame)
+  "Return FRAME's line height."
+  (let ((frame (or frame (selected-frame))))
+    (company-box--width-selected-frame frame (line-pixel-height))))
 
 (defun company-box--with-icons-p ()
   (let ((spaces (+ (- (current-column) (string-width company-prefix))
@@ -516,7 +526,7 @@ It doesn't nothing if a font icon is used."
                             (setq tmp (window-in-direction 'below tmp)))
                           tmp)))
               (+ (or (nth 2 (window-line-height 'mode-line win))
-                     (- (frame-pixel-height) (* (frame-char-height) 3)))
+                     (- (frame-pixel-height) (* (company-box--line-height) 3)))
                  (or (and win (nth 1 (window-edges win t nil t)))
                      0))))))
 
@@ -541,7 +551,7 @@ It doesn't nothing if a font icon is used."
                                       (window-tab-line-height)
                                     0))
           (top (+ top window-tab-line-height))
-          (char-height (frame-char-height frame))
+          (char-height (company-box--line-height frame))
           (char-width (frame-char-width frame))
           (height (* (min company-candidates-length company-tooltip-limit) char-height))
           (space-numbers (if (eq company-show-quick-access 'left) char-width 0))
@@ -866,7 +876,7 @@ Argument SHOW, see function `company-box--frame-show' description."
   (/= 1 (company-box--percent
          company-box--height
          (* company-candidates-length
-            (frame-char-height frame)))))
+            (company-box--line-height frame)))))
 
 (defun company-box--scrollbar-prevent-changes (&rest _)
   (when company-box-debug-scrollbar
@@ -917,14 +927,14 @@ Argument SHOW, see function `company-box--frame-show' description."
     (let* ((selection (or company-selection 0))
            (buffer (company-box--get-buffer "-scrollbar"))
            (h-frame company-box--height)
-           (frame-char-height (frame-char-height frame))
+           (char-height (company-box--line-height frame))
            (n-elements company-candidates-length)
            (percent (company-box--percent selection (1- n-elements)))
-           (percent-display (company-box--percent h-frame (* n-elements frame-char-height)))
+           (percent-display (company-box--percent h-frame (* n-elements char-height)))
            (scrollbar-pixels (* h-frame percent-display))
-           (height-scrollbar (/ scrollbar-pixels frame-char-height))
+           (height-scrollbar (/ scrollbar-pixels char-height))
            (blank-pixels (* (- h-frame scrollbar-pixels) percent))
-           (height-blank (/ blank-pixels frame-char-height))
+           (height-blank (/ blank-pixels char-height))
            (inhibit-redisplay t)
            (inhibit-eval-during-redisplay t)
            (window-configuration-change-hook nil)
