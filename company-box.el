@@ -895,6 +895,10 @@ Argument SHOW, see function `company-box--frame-show' description."
                 window-safe-min-width company-box-scrollbar-width)
     (when (bound-and-true-p tab-bar-mode)
       (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
+    ;; NOTE: If you try to display character smaller than certain threshold, it
+    ;; will display entire character instead!
+    ;;
+    ;; Not sure what's the threshold here, let's set to 0.02 for now.
     (when (< 0.02 height-blank)
       (insert (propertize " " 'display `(space :align-to right-fringe :height ,height-blank))
               (propertize "\n" 'face (list :height height-blank))))
