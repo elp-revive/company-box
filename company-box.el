@@ -435,7 +435,7 @@ It doesn't nothing if a font icon is used."
     (let ((color (or (get-text-property (point) 'company-box--color)
                      'company-tooltip-selection))
           (inhibit-modification-hooks t))
-      (overlay-put (company-box--get-ov) 'face color)
+      (overlay-put (company-box--get-ov) 'face `(:foreground nil :background ,(face-background color)))
       (overlay-put (company-box--get-ov-common) 'face 'company-tooltip-common-selection)
       (company-box--update-image color))))
 
@@ -594,14 +594,14 @@ It doesn't nothing if a font icon is used."
     (frame-local-setq company-box-buffer-origin (current-buffer) frame)
     (modify-frame-parameters
      frame
-     `((width . (text-pixels . ,width))
-       (height . (text-pixels . ,company-box--height))
-       (user-size . t)
-       (left . (+ ,(or new-x company-box--x)))
-       (top . (+ ,company-box--top))
+     `((width         . (text-pixels . ,width))
+       (height        . (text-pixels . ,company-box--height))
+       (user-size     . t)
+       (left          . (+ ,(or new-x company-box--x)))
+       (top           . (+ ,company-box--top))
        (user-position . t)
-       (right-fringe . 0)
-       (left-fringe . 0)))))
+       (right-fringe  . 0)
+       (left-fringe   . 0)))))
 
 (defun company-box--display (string on-update)
   "Display the completions."
