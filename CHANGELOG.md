@@ -12,6 +12,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 * Add read-only
 * Ensure no tab-line
 * Add customize variable, scrollbar width
+* Respect prerender plugin by nullify the foreground face
 
 ## 0.0.1
 > Released Jul 19, 2021
