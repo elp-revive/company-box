@@ -296,8 +296,11 @@ Examples:
 
 (defun company-box--line-height (&optional frame)
   "Return FRAME's line height."
-  (let ((frame (or frame (selected-frame))))
-    (company-box--with-selected-frame frame (line-pixel-height))))
+  (let ((frame (or frame (selected-frame)))
+        (line-height (company-box--with-selected-frame frame (line-pixel-height))))
+    (if (or (null line-height) (zerop line-height))
+        (frame-char-height frame)
+      line-height)))
 
 (defun company-box--with-icons-p ()
   (let ((spaces (+ (- (current-column) (string-width company-prefix))
