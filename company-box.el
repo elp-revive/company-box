@@ -280,7 +280,7 @@ Examples:
                ((window-live-p window)))
      (with-selected-window window (let (buffer-read-only) (progn ,@body)))))
 
-(defmacro company-box--width-selected-frame (frame  &rest body)
+(defmacro company-box--with-selected-frame (frame  &rest body)
   "Execute BODY inside a selected frame."
   (declare (indent 1) (debug t))
   `(when-let (((frame-live-p frame))) (with-selected-frame frame (progn ,@body))))
@@ -297,7 +297,7 @@ Examples:
 (defun company-box--line-height (&optional frame)
   "Return FRAME's line height."
   (let ((frame (or frame (selected-frame))))
-    (company-box--width-selected-frame frame (line-pixel-height))))
+    (company-box--with-selected-frame frame (line-pixel-height))))
 
 (defun company-box--with-icons-p ()
   (let ((spaces (+ (- (current-column) (string-width company-prefix))
