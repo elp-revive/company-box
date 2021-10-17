@@ -296,6 +296,10 @@ Examples:
 
 (defun company-box--line-height (&optional frame)
   "Return FRAME's line height."
+  ;; NOTE: We don't consider `line-spacing' since we already set it to 0 in
+  ;; variable `company-box-frame-parameters'.
+  ;;
+  ;; We just use function `frame-char-height' instead of function `line-pixel-height'.
   (frame-char-height frame))
 
 (defun company-box--with-icons-p ()
