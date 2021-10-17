@@ -296,8 +296,8 @@ Examples:
 
 (defun company-box--line-height (&optional frame)
   "Return FRAME's line height."
-  (let ((frame (or frame (selected-frame)))
-        (line-height (company-box--with-selected-frame frame (line-pixel-height))))
+  (let* ((frame (or frame (selected-frame)))
+         (line-height (company-box--with-selected-frame frame (line-pixel-height))))
     (if (or (null line-height) (zerop line-height))
         (frame-char-height frame)
       line-height)))
