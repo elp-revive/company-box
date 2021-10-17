@@ -313,9 +313,9 @@ Examples:
 
 (defun company-box--make-scrollbar-parameter ()
   (cl-case company-box-scrollbar
-    (inherit (frame-parameter nil 'vertical-scroll-bars))
-    (left 'left)
-    (right 'right)))
+    (`inherit (frame-parameter nil 'vertical-scroll-bars))
+    (`left 'left)
+    (`right 'right)))
 
 (defun company-box--make-frame (&optional buf)
   (let* ((after-make-frame-functions nil)
