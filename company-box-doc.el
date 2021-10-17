@@ -109,6 +109,7 @@
 
 (defun company-box-doc--make-buffer (object)
   (let* ((buffer-list-update-hook nil)
+         (window-configuration-change-hook nil)
          (inhibit-modification-hooks t)
          (string (cond ((stringp object) object)
                        ((bufferp object) (company-box--with-buffer-valid object (buffer-string))))))
