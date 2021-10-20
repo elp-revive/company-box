@@ -34,13 +34,16 @@
 (eval-when-compile
   (require 'find-func)
   (require 'subr-x)
+
   (defconst company-box-icons-dir
     (->> (find-library-name "company-box")
          (file-name-directory)
          (expand-file-name "images")
          (file-name-as-directory)))
+
   (defconst company-box--have-imagemagick (image-type-available-p 'imagemagick)
     "Emacs might not be compiled with imagemagick.")
+
   (defun company-box-icons-image (file)
     (let* ((extension (intern (upcase (or (file-name-extension file) ""))))
            (use-magick (and company-box--have-imagemagick
