@@ -878,7 +878,7 @@ Argument SHOW, see function `company-box--frame-show' description."
 (defun company-box--scrollbar-p (frame)
   (/= 1 (company-box--percent
          company-box--height
-         (* company-candidates-length
+         (* (or company-candidates-length 0)
             (company-box--line-height frame)))))
 
 (defun company-box--scrollbar-prevent-changes (&rest _)
