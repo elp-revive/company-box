@@ -13,6 +13,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 * Ensure no tab-line
 * Add customize variable, scrollbar width
 * Respect prerender plugin by nullify the foreground face
+* Add no redisplay macro
+* Add mute apply macro
 
 ## 0.0.1
 > Released Jul 19, 2021
