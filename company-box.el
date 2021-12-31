@@ -334,10 +334,8 @@ Examples:
     (`right 'right)))
 
 (defun company-box--make-frame (&optional buf)
-  (let* ((after-make-frame-functions nil)
-         (display-buffer-alist nil)
-         (before-make-frame-hook nil)
-         (buffer (or buf (company-box--get-buffer)))
+  (let* ((buffer (or buf (company-box--get-buffer)))
+         after-make-frame-functions display-buffer-alist before-make-frame-hook
          (params (append company-box-frame-parameters
                          `((vertical-scroll-bars . ,(company-box--make-scrollbar-parameter))
                            (default-minibuffer-frame . ,(selected-frame))
@@ -393,20 +391,19 @@ It doesn't nothing if a font icon is used."
     (setq company-box--numbers-pos nil)))
 
 (defun company-box--update-numbers (start)
-  (let ((side (if (eq company-show-quick-access 'left) 'left-margin 'right-margin))
-        (offset (if (eq company-show-quick-access 'left) 0 10))
-        (inhibit-redisplay t)
-        (inhibit-modification-hooks t))
-    (company-box--remove-numbers side)
-    (dotimes (index 10)
-      (-some--> start
-        (if (get-text-property it 'company-box--number-pos)
-            it
-          (next-single-property-change it 'company-box--number-pos))
-        (progn
-          (push it company-box--numbers-pos)
-          (setq start (1+ it)))
-        (put-text-property (1- it) it 'display `((margin ,side) ,(aref company-box--numbers (+ index offset))))))))
+  (company-box--with-no-redisplay
+    (let ((side (if (eq company-show-quick-access 'left) 'left-margin 'right-margin))
+          (offset (if (eq company-show-quick-access 'left) 0 10)))
+      (company-box--remove-numbers side)
+      (dotimes (index 10)
+        (-some--> start
+          (if (get-text-property it 'company-box--number-pos)
+              it
+            (next-single-property-change it 'company-box--number-pos))
+          (progn
+            (push it company-box--numbers-pos)
+            (setq start (1+ it)))
+          (put-text-property (1- it) it 'display `((margin ,side) ,(aref company-box--numbers (+ index offset)))))))))
 
 (defun company-box--maybe-move-number (start)
   (when company-show-quick-access
@@ -440,23 +437,22 @@ It doesn't nothing if a font icon is used."
   start)
 
 (defun company-box--move-overlays (selection &optional new-point)
-  (if (null selection)
-      (company-box--move-overlay-no-selection)
-    (company-box--update-image)
-    (goto-char (if new-point new-point (company-box--point-at-line selection)))
-    (let* ((bol (line-beginning-position))
-           (eol (line-beginning-position 2))
-           (inhibit-modification-hooks t)
-           (start-common (next-single-property-change bol 'company-box--candidate-string nil eol))
-           (end-common (company-box--end-of-common start-common eol)))
-      (move-overlay (company-box--get-ov) bol eol)
-      (move-overlay (company-box--get-ov-common) start-common end-common))
-    (let ((color (or (get-text-property (point) 'company-box--color)
-                     'company-tooltip-selection))
-          (inhibit-modification-hooks t))
-      (overlay-put (company-box--get-ov) 'face `(:background ,(face-background color)))
-      (overlay-put (company-box--get-ov-common) 'face 'company-tooltip-common-selection)
-      (company-box--update-image color))))
+  (company-box--with-no-redisplay
+    (if (null selection)
+        (company-box--move-overlay-no-selection)
+      (company-box--update-image)
+      (goto-char (if new-point new-point (company-box--point-at-line selection)))
+      (let* ((bol (line-beginning-position))
+             (eol (line-beginning-position 2))
+             (start-common (next-single-property-change bol 'company-box--candidate-string nil eol))
+             (end-common (company-box--end-of-common start-common eol)))
+        (move-overlay (company-box--get-ov) bol eol)
+        (move-overlay (company-box--get-ov-common) start-common end-common))
+      (let ((color (or (get-text-property (point) 'company-box--color)
+                       'company-tooltip-selection)))
+        (overlay-put (company-box--get-ov) 'face `(:background ,(face-background color)))
+        (overlay-put (company-box--get-ov-common) 'face 'company-tooltip-common-selection)
+        (company-box--update-image color)))))
 
 
 (defun company-box--get-candidates-between (start end)
@@ -479,61 +475,57 @@ It doesn't nothing if a font icon is used."
    point 'company-box--rendered nil (min (point-max) (+ point height -1))))
 
 (defun company-box--render-lines (point &optional no-remove-numbers)
-  (when-let* ((height (1+ company-box--chunk-size))
-              (start (company-box--get-start point height))
-              (end (company-box--get-end point height))
-              (candidates (company-box--get-candidates-between start end))
-              (inhibit-modification-hooks t)
-              (inhibit-redisplay t))
-    (unless no-remove-numbers
-      (company-box--remove-numbers))
-    (save-excursion
-      (delete-region start end)
-      (goto-char start)
-      (insert
-       (company-box--with-buffer-valid company-box--parent-buffer
-         (--> candidates
-              (mapcar (-compose 'company-box--make-line 'company-box--make-candidate) it)
-              (mapconcat 'identity it "\n")))
-       "\n")
-      (put-text-property start (point) 'company-box--rendered t))))
+  (company-box--with-no-redisplay
+    (when-let* ((height (1+ company-box--chunk-size))
+                (start (company-box--get-start point height))
+                (end (company-box--get-end point height))
+                (candidates (company-box--get-candidates-between start end)))
+      (unless no-remove-numbers (company-box--remove-numbers))
+      (save-excursion
+        (delete-region start end)
+        (goto-char start)
+        (insert
+         (company-box--with-buffer-valid company-box--parent-buffer
+           (--> candidates
+                (mapcar (-compose 'company-box--make-line 'company-box--make-candidate) it)
+                (mapconcat 'identity it "\n")))
+         "\n")
+        (put-text-property start (point) 'company-box--rendered t)))))
 
 (defun company-box--render-buffer (string on-update)
-  (let ((buffer (current-buffer))
-        (inhibit-modification-hooks t)
-        (candidates-length company-candidates-length)
-        (show-numbers company-show-quick-access)
-        (with-icons-p company-box--with-icons-p)
-        (window-configuration-change-hook nil)
-        (buffer-list-update-hook nil))
-    (company-box--with-buffer nil
-      (erase-buffer)
-      (insert string)
-      (put-text-property (point-min) (point-max) 'company-box--rendered nil)
-      (setq company-candidates-length candidates-length
-            company-show-quick-access show-numbers
-            company-box--with-icons-p with-icons-p)
-      (unless on-update
-        (setq mode-line-format nil
-              header-line-format nil
-              tab-line-format nil
-              display-line-numbers nil
-              truncate-lines t
-              show-trailing-whitespace nil
-              company-box--parent-buffer buffer
-              cursor-in-non-selected-windows nil)
-        (when (bound-and-true-p tab-bar-mode)
-          (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
-        (setq-local scroll-step 1
-                    scroll-conservatively 100000
-                    scroll-margin 0
-                    bidi-display-reordering nil
-                    redisplay--inhibit-bidi t
-                    ;;next-screen-context-lines 0
-                    scroll-preserve-screen-position t
-                    fontification-functions nil
-                    window-scroll-functions '(company-box--handle-scroll))
-        (add-hook 'window-configuration-change-hook 'company-box--prevent-changes t t)))))
+  (company-box--with-no-redisplay
+    (let ((buffer (current-buffer))
+          (candidates-length company-candidates-length)
+          (show-numbers company-show-quick-access)
+          (with-icons-p company-box--with-icons-p))
+      (company-box--with-buffer nil
+        (erase-buffer)
+        (insert string)
+        (put-text-property (point-min) (point-max) 'company-box--rendered nil)
+        (setq company-candidates-length candidates-length
+              company-show-quick-access show-numbers
+              company-box--with-icons-p with-icons-p)
+        (unless on-update
+          (setq mode-line-format nil
+                header-line-format nil
+                tab-line-format nil
+                display-line-numbers nil
+                truncate-lines t
+                show-trailing-whitespace nil
+                company-box--parent-buffer buffer
+                cursor-in-non-selected-windows nil)
+          (when (bound-and-true-p tab-bar-mode)
+            (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
+          (setq-local scroll-step 1
+                      scroll-conservatively 100000
+                      scroll-margin 0
+                      bidi-display-reordering nil
+                      redisplay--inhibit-bidi t
+                      ;;next-screen-context-lines 0
+                      scroll-preserve-screen-position t
+                      fontification-functions nil
+                      window-scroll-functions '(company-box--handle-scroll))
+          (add-hook 'window-configuration-change-hook 'company-box--prevent-changes t t))))))
 
 (defvar-local company-box--bottom nil)
 
@@ -564,63 +556,61 @@ It doesn't nothing if a font icon is used."
       (setq company-box--edges (window-edges nil t nil t))))
 
 (defun company-box--compute-frame-position (frame)
-  (-let* ((window-configuration-change-hook nil)
-          ((left top _right _bottom) (company-box--edges))
-          (window-tab-line-height (if (fboundp 'window-tab-line-height)
-                                      (window-tab-line-height)
-                                    0))
-          (top (+ top window-tab-line-height))
-          (char-height (company-box--line-height frame))
-          (char-width (frame-char-width frame))
-          (height (* (min company-candidates-length company-tooltip-limit) char-height))
-          (space-numbers (if (eq company-show-quick-access 'left) char-width 0))
-          (frame-resize-pixelwise t)
-          (mode-line-y (company-box--point-bottom))
-          ((p-x . p-y) (company-box--prefix-pos))
-          (p-y-abs (+ top p-y))
-          (y (or (and (> p-y-abs (/ mode-line-y 2))
-                      (<= (- mode-line-y p-y) (+ char-height height))
-                      (> (- p-y-abs height) 0)
-                      (- p-y height))
-                 (+ p-y char-height)))
-          (height (or (and (> y p-y)
-                           (> height (- mode-line-y y))
-                           (- mode-line-y y))
-                      height))
-          (height (- height (mod height char-height)))
-          (scrollbar-width (if (eq company-box-scrollbar 'left) (frame-scroll-bar-width frame) 0))
-          (x (if (eq company-box-frame-behavior 'point)
-                 p-x
-               (if company-box--with-icons-p
-                   (- p-x (* char-width (if (= company-box--space 2) 2 3)) space-numbers scrollbar-width)
-                 (- p-x (if (= company-box--space 0) 0 char-width) space-numbers scrollbar-width)))))
-    (setq company-box--x (max (+ x left) 0)
-          company-box--top (+ y top)
-          company-box--height height
-          company-box--chunk-size (/ height char-height))
-    (company-box--with-buffer nil
+  (company-box--with-no-redisplay
+    (-let* (((left top _right _bottom) (company-box--edges))
+            (window-tab-line-height (if (fboundp 'window-tab-line-height)
+                                        (window-tab-line-height)
+                                      0))
+            (top (+ top window-tab-line-height))
+            (char-height (company-box--line-height frame))
+            (char-width (frame-char-width frame))
+            (height (* (min company-candidates-length company-tooltip-limit) char-height))
+            (space-numbers (if (eq company-show-quick-access 'left) char-width 0))
+            (frame-resize-pixelwise t)
+            (mode-line-y (company-box--point-bottom))
+            ((p-x . p-y) (company-box--prefix-pos))
+            (p-y-abs (+ top p-y))
+            (y (or (and (> p-y-abs (/ mode-line-y 2))
+                        (<= (- mode-line-y p-y) (+ char-height height))
+                        (> (- p-y-abs height) 0)
+                        (- p-y height))
+                   (+ p-y char-height)))
+            (height (or (and (> y p-y)
+                             (> height (- mode-line-y y))
+                             (- mode-line-y y))
+                        height))
+            (height (- height (mod height char-height)))
+            (scrollbar-width (if (eq company-box-scrollbar 'left) (frame-scroll-bar-width frame) 0))
+            (x (if (eq company-box-frame-behavior 'point)
+                   p-x
+                 (if company-box--with-icons-p
+                     (- p-x (* char-width (if (= company-box--space 2) 2 3)) space-numbers scrollbar-width)
+                   (- p-x (if (= company-box--space 0) 0 char-width) space-numbers scrollbar-width)))))
       (setq company-box--x (max (+ x left) 0)
             company-box--top (+ y top)
             company-box--height height
-            company-box--chunk-size (/ height char-height)))))
+            company-box--chunk-size (/ height char-height))
+      (company-box--with-buffer nil
+        (setq company-box--x (max (+ x left) 0)
+              company-box--top (+ y top)
+              company-box--height height
+              company-box--chunk-size (/ height char-height))))))
 
 (defun company-box--update-frame-position (frame)
-  (-let (((new-x . width) (company-box--set-width nil t))
-         (window-configuration-change-hook nil)
-         (buffer-list-update-hook nil)
-         (inhibit-redisplay t))
-    (frame-local-setq company-box-window-origin (selected-window) frame)
-    (frame-local-setq company-box-buffer-origin (current-buffer) frame)
-    (modify-frame-parameters
-     frame
-     `((width         . (text-pixels . ,width))
-       (height        . (text-pixels . ,company-box--height))
-       (user-size     . t)
-       (left          . (+ ,(or new-x company-box--x)))
-       (top           . (+ ,company-box--top))
-       (user-position . t)
-       (right-fringe  . 0)
-       (left-fringe   . 0)))))
+  (company-box--with-no-redisplay
+    (-let (((new-x . width) (company-box--set-width nil t)))
+      (frame-local-setq company-box-window-origin (selected-window) frame)
+      (frame-local-setq company-box-buffer-origin (current-buffer) frame)
+      (modify-frame-parameters
+       frame
+       `((width         . (text-pixels . ,width))
+         (height        . (text-pixels . ,company-box--height))
+         (user-size     . t)
+         (left          . (+ ,(or new-x company-box--x)))
+         (top           . (+ ,company-box--top))
+         (user-position . t)
+         (right-fringe  . 0)
+         (left-fringe   . 0))))))
 
 (defun company-box--display (string on-update)
   "Display the completions."
@@ -863,30 +853,30 @@ Argument SHOW, see function `company-box--frame-show' description."
           (cons start (company-box--point-at-line height start)))))))
 
 (defun company-box--set-width (&optional win-start value-only)
-  (-let* ((inhibit-redisplay t)
-          (frame (company-box--get-frame (frame-parent)))
-          (window (frame-local-getq company-box-window (frame-parent)))
-          (char-width (frame-char-width frame))
-          ((start . end) (company-box--get-start-end-for-width window win-start))
-          (width (+ (company-box--calc-len (window-buffer window) start end char-width)
-                    (if (and (eq company-box-scrollbar t) (company-box--scrollbar-p frame)) (* 2 char-width) 0)
-                    char-width))
-          (width (max (min width
-                           (* company-tooltip-maximum-width char-width))
-                      (* company-tooltip-minimum-width char-width)))
-          (diff (abs (- (frame-pixel-width frame) width)))
-          (frame-width (frame-pixel-width (frame-parent)))
-          (new-x (and (> (+ width company-box--x) frame-width)
-                      (max 0 (- frame-width width char-width)))))
-    (when company-box-debug-scrollbar
-      (message "[RESIZE] NEW-WIDTH=%s NEW-PIXEL=%s OLD=%s OLD-PIXEL=%s"
-               (/ width char-width) width (frame-parameter frame 'width) (frame-pixel-width frame)))
-    (or (and value-only (cons new-x width))
-        (and (> diff 2)
-             (modify-frame-parameters
-              frame
-              `((width . (text-pixels . ,width))
-                (left . (+ ,(or new-x company-box--x)))))))))
+  (company-box--with-no-redisplay
+    (-let* ((frame (company-box--get-frame (frame-parent)))
+            (window (frame-local-getq company-box-window (frame-parent)))
+            (char-width (frame-char-width frame))
+            ((start . end) (company-box--get-start-end-for-width window win-start))
+            (width (+ (company-box--calc-len (window-buffer window) start end char-width)
+                      (if (and (eq company-box-scrollbar t) (company-box--scrollbar-p frame)) (* 2 char-width) 0)
+                      char-width))
+            (width (max (min width
+                             (* company-tooltip-maximum-width char-width))
+                        (* company-tooltip-minimum-width char-width)))
+            (diff (abs (- (frame-pixel-width frame) width)))
+            (frame-width (frame-pixel-width (frame-parent)))
+            (new-x (and (> (+ width company-box--x) frame-width)
+                        (max 0 (- frame-width width char-width)))))
+      (when company-box-debug-scrollbar
+        (message "[RESIZE] NEW-WIDTH=%s NEW-PIXEL=%s OLD=%s OLD-PIXEL=%s"
+                 (/ width char-width) width (frame-parameter frame 'width) (frame-pixel-width frame)))
+      (or (and value-only (cons new-x width))
+          (and (> diff 2)
+               (modify-frame-parameters
+                frame
+                `((width . (text-pixels . ,width))
+                  (left . (+ ,(or new-x company-box--x))))))))))
 
 (defun company-box--percent (a b)
   (/ (float a) (float b)))
@@ -943,40 +933,38 @@ Argument SHOW, see function `company-box--frame-show' description."
 
 (defun company-box--update-scrollbar (frame &optional first)
   (when (eq company-box-scrollbar t)
-    (let* ((selection (or company-selection 0))
-           (buffer (company-box--get-buffer "-scrollbar"))
-           (h-frame company-box--height)
-           (char-height (company-box--line-height frame))
-           (n-elements company-candidates-length)
-           (percent (company-box--percent selection (1- n-elements)))
-           (percent-display (company-box--percent h-frame (* n-elements char-height)))
-           (scrollbar-pixels (* h-frame percent-display))
-           (height-scrollbar (/ scrollbar-pixels char-height))
-           (blank-pixels (* (- h-frame scrollbar-pixels) percent))
-           (height-blank (/ blank-pixels char-height))
-           (inhibit-redisplay t)
-           (inhibit-eval-during-redisplay t)
-           (window-configuration-change-hook nil)
-           (window-scroll-functions nil))
-      (when company-box-debug-scrollbar
-        (message "[SCROLL] SELECTION=%s BUFFER=%s H-FRAME=%s N-ELEMENTS=%s PERCENT=%s PERCENT-DISPLAY=%s SCROLLBAR-PIXEL=%s HEIGHT=SCROLLBAR=%s BLANK-PIXELS=%s HEIGHT-BLANK=%s FRAME-CHAR-HEIGHT=%s FRAME-CHAR-HEIGHT-NO-FRAME=%s FRAME=%s MUL=%s"
-                 selection buffer h-frame n-elements percent percent-display scrollbar-pixels height-scrollbar blank-pixels height-blank (frame-char-height frame) (frame-char-height) frame (* n-elements (frame-char-height frame))))
-      (cond
-       ((and first (= percent-display 1) (window-live-p company-box--scrollbar-window))
-        (delete-window company-box--scrollbar-window))
-       ((window-live-p company-box--scrollbar-window)
-        (company-box--update-scrollbar-buffer height-blank height-scrollbar percent buffer))
-       ((/= percent-display 1)
-        (setq
-         company-box--scrollbar-window
-         (with-selected-frame (company-box--get-frame)
-           (let ((window-configuration-change-hook nil)
-                 (display-buffer-alist nil)
-                 (window-scroll-functions nil))
-             (display-buffer-in-side-window
-              (company-box--update-scrollbar-buffer height-blank height-scrollbar percent buffer)
-              `((side . right) (window-width . ,company-box-scrollbar-width))))))
-        (frame-local-setq company-box-scrollbar (window-buffer company-box--scrollbar-window) frame))))))
+    (company-box--with-no-redisplay
+      (let* ((selection (or company-selection 0))
+             (buffer (company-box--get-buffer "-scrollbar"))
+             (h-frame company-box--height)
+             (char-height (company-box--line-height frame))
+             (n-elements company-candidates-length)
+             (percent (company-box--percent selection (1- n-elements)))
+             (percent-display (company-box--percent h-frame (* n-elements char-height)))
+             (scrollbar-pixels (* h-frame percent-display))
+             (height-scrollbar (/ scrollbar-pixels char-height))
+             (blank-pixels (* (- h-frame scrollbar-pixels) percent))
+             (height-blank (/ blank-pixels char-height))
+             (inhibit-eval-during-redisplay t)
+             window-scroll-functions)
+        (when company-box-debug-scrollbar
+          (message "[SCROLL] SELECTION=%s BUFFER=%s H-FRAME=%s N-ELEMENTS=%s PERCENT=%s PERCENT-DISPLAY=%s SCROLLBAR-PIXEL=%s HEIGHT=SCROLLBAR=%s BLANK-PIXELS=%s HEIGHT-BLANK=%s FRAME-CHAR-HEIGHT=%s FRAME-CHAR-HEIGHT-NO-FRAME=%s FRAME=%s MUL=%s"
+                   selection buffer h-frame n-elements percent percent-display scrollbar-pixels height-scrollbar blank-pixels height-blank (frame-char-height frame) (frame-char-height) frame (* n-elements (frame-char-height frame))))
+        (cond
+         ((and first (= percent-display 1) (window-live-p company-box--scrollbar-window))
+          (delete-window company-box--scrollbar-window))
+         ((window-live-p company-box--scrollbar-window)
+          (company-box--update-scrollbar-buffer height-blank height-scrollbar percent buffer))
+         ((/= percent-display 1)
+          (setq
+           company-box--scrollbar-window
+           (with-selected-frame (company-box--get-frame)
+             (company-box--with-no-redisplay
+               (let (window-scroll-functions)
+                 (display-buffer-in-side-window
+                  (company-box--update-scrollbar-buffer height-blank height-scrollbar percent buffer)
+                  `((side . right) (window-width . ,company-box-scrollbar-width)))))))
+          (frame-local-setq company-box-scrollbar (window-buffer company-box--scrollbar-window) frame)))))))
 
 (defun company-box--point-at-line (&optional line start)
   (save-excursion
@@ -985,39 +973,35 @@ Argument SHOW, see function `company-box--frame-show' description."
     (point)))
 
 (defun company-box--move-selection (&optional first-render)
-  (let ((selection company-selection)
-        (candidates-length company-candidates-length)
-        (inhibit-redisplay t)
-        (inhibit-modification-hooks t)
-        (buffer-list-update-hook nil)
-        (window-configuration-change-hook nil))
-    (company-box--with-buffer-window nil
-      (setq company-selection selection)
-      (let ((new-point (company-box--point-at-line selection))
-            (buffer-list-update-hook nil)
-            (window-configuration-change-hook nil))
-        (cond ((and (> new-point 1) (null (get-text-property (1- new-point) 'company-box--rendered)))
-               ;; When going backward, render lines not yet visible
-               ;; This avoid to render the lines when it's already visible
-               ;; causing window-start to jump
-               (company-box--render-lines (1- new-point))
-               (company-box--move-overlays selection))
-              ((get-text-property new-point 'company-box--rendered)
-               ;; Line is already rendered, just move overlays
-               (company-box--move-overlays selection new-point))
-              (t
-               ;; Line is not rendered at point
-               (company-box--render-lines new-point)
-               (company-box--move-overlays selection))))
-      (when (equal selection (1- candidates-length))
-        ;; Ensure window doesn't go past last candidate
-        (--> (- company-box--chunk-size)
-             (company-box--point-at-line it (point-max))
-             (set-window-start nil it))))
-    (unless first-render
-      (company-box--update-scrollbar (company-box--get-frame) first-render))
-    (run-hook-with-args 'company-box-selection-hook selection
-                        (or (frame-parent) (selected-frame)))))
+  (company-box--with-no-redisplay
+    (let ((selection company-selection)
+          (candidates-length company-candidates-length))
+      (company-box--with-buffer-window nil
+        (setq company-selection selection)
+        (company-box--with-no-redisplay
+          (let ((new-point (company-box--point-at-line selection)))
+            (cond ((and (> new-point 1) (null (get-text-property (1- new-point) 'company-box--rendered)))
+                   ;; When going backward, render lines not yet visible
+                   ;; This avoid to render the lines when it's already visible
+                   ;; causing window-start to jump
+                   (company-box--render-lines (1- new-point))
+                   (company-box--move-overlays selection))
+                  ((get-text-property new-point 'company-box--rendered)
+                   ;; Line is already rendered, just move overlays
+                   (company-box--move-overlays selection new-point))
+                  (t
+                   ;; Line is not rendered at point
+                   (company-box--render-lines new-point)
+                   (company-box--move-overlays selection)))))
+        (when (equal selection (1- candidates-length))
+          ;; Ensure window doesn't go past last candidate
+          (--> (- company-box--chunk-size)
+               (company-box--point-at-line it (point-max))
+               (set-window-start nil it))))
+      (unless first-render
+        (company-box--update-scrollbar (company-box--get-frame) first-render))
+      (run-hook-with-args 'company-box-selection-hook selection
+                          (or (frame-parent) (selected-frame))))))
 
 (defun company-box--prevent-changes (&rest _)
   (set-window-margins
@@ -1056,17 +1040,17 @@ Argument SHOW, see function `company-box--frame-show' description."
               )))
 
 (defun company-box--update ()
-  (-let* (((prefix common search length) company-box--state)
-          (frame (company-box--get-frame))
-          (window-configuration-change-hook nil)
-          (frame-visible (and (frame-live-p frame) (frame-visible-p frame))))
-    (if (and frame-visible
-             (equal search company-search-string)
-             (equal length company-candidates-length)
-             (string= company-prefix prefix)
-             (string= company-common common))
-        (company-box--move-selection)
-      (company-box-show frame-visible))))
+  (company-box--with-no-redisplay
+    (-let* (((prefix common search length) company-box--state)
+            (frame (company-box--get-frame))
+            (frame-visible (and (frame-live-p frame) (frame-visible-p frame))))
+      (if (and frame-visible
+               (equal search company-search-string)
+               (equal length company-candidates-length)
+               (string= company-prefix prefix)
+               (string= company-common common))
+          (company-box--move-selection)
+        (company-box-show frame-visible)))))
 
 (defun company-box--handle-scroll-parent (win new-start)
   (when (and (eq (frame-local-getq company-box-window-origin (company-box--get-frame)) win)
@@ -1100,8 +1084,7 @@ COMMAND: See `company-frontends'."
       (`select-mouse (company-box--select-mouse)))))
 
 (defun company-box--ensure-full-window-is-rendered (&optional start)
-  (let ((window-configuration-change-hook nil)
-        (buffer-list-update-hook nil))
+  (company-box--with-no-redisplay
     (company-box--with-buffer-window nil
       (let* ((start (or start (window-start)))
              (line-end company-box--chunk-size)
@@ -1112,16 +1095,14 @@ COMMAND: See `company-frontends'."
             (company-box--render-lines (- end (1+ index)) t)))))))
 
 (defun company-box--on-start-change ()
-  (setq company-box--prefix-pos nil
-        company-box--edges nil)
-  (let ((frame (company-box--get-frame))
-        (inhibit-redisplay t)
-        (inhibit-modification-hooks t)
-        (window-scroll-functions nil))
-    (when (and (frame-live-p frame) (frame-visible-p frame))
-      (company-box--compute-frame-position frame)
-      (company-box--ensure-full-window-is-rendered)
-      (company-box--update-frame-position frame))))
+  (company-box--with-no-redisplay
+    (setq company-box--prefix-pos nil
+          company-box--edges nil)
+    (let ((frame (company-box--get-frame)) window-scroll-functions)
+      (when (and (frame-live-p frame) (frame-visible-p frame))
+        (company-box--compute-frame-position frame)
+        (company-box--ensure-full-window-is-rendered)
+        (company-box--update-frame-position frame)))))
 
 (defun company-box--kill-delay (buffer)
   (when (buffer-live-p buffer)

@@ -78,13 +78,14 @@
 (defvar-local company-box-doc--timer nil)
 
 (defun company-box-doc--fetch-doc-buffer (candidate)
-  (let ((inhibit-message t) (message-log-max nil))
+  (company-box--mute-apply
     (--> (while-no-input
            (-some-> (company-call-backend 'doc-buffer candidate)
              (get-buffer)))
          (if (eq t it) nil it))))
 
 (defun company-box-doc--set-frame-position (frame)
+  "Update frame position."
   (-let* ((box-position (frame-position (company-box--get-frame)))
           (box-width (frame-pixel-width (company-box--get-frame)))
           (window (frame-root-window frame))
@@ -108,27 +109,26 @@
     (set-frame-size frame width height t)))
 
 (defun company-box-doc--make-buffer (object)
-  (let* ((buffer-list-update-hook nil)
-         (window-configuration-change-hook nil)
-         (inhibit-modification-hooks t)
-         (string (cond ((stringp object) object)
-                       ((bufferp object) (company-box--with-buffer-valid object (buffer-string))))))
-    (setq string (string-trim string))
-    (when (and string (> (length string) 0))
-      (company-box--with-buffer "doc"
-        (erase-buffer)
-        (insert string)
-        (let ((text-scale-mode-step 1.1))
-          (text-scale-set company-box-doc-text-scale-level))
-        (setq mode-line-format nil
-              display-line-numbers nil
-              header-line-format nil
-              tab-line-format nil
-              show-trailing-whitespace nil
-              cursor-in-non-selected-windows nil)
-        (when (bound-and-true-p tab-bar-mode)
-          (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
-        (current-buffer)))))
+  "Create doc buffer."
+  (company-box--with-no-redisplay
+    (let ((string (cond ((stringp object) object)
+                        ((bufferp object) (company-box--with-buffer-valid object (buffer-string))))))
+      (setq string (string-trim string))
+      (when (and string (> (length string) 0))
+        (company-box--with-buffer "doc"
+          (erase-buffer)
+          (insert string)
+          (let ((text-scale-mode-step 1.1))
+            (text-scale-set company-box-doc-text-scale-level))
+          (setq mode-line-format nil
+                display-line-numbers nil
+                header-line-format nil
+                tab-line-format nil
+                show-trailing-whitespace nil
+                cursor-in-non-selected-windows nil)
+          (when (bound-and-true-p tab-bar-mode)
+            (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
+          (current-buffer))))))
 
 (defun company-box-doc--make-frame (buffer)
   (let* ((company-box-frame-parameters
@@ -144,25 +144,22 @@
   (frame-local-getq company-box-doc-frame))
 
 (defun company-box-doc--show (selection frame)
-  (cl-letf (((symbol-function 'completing-read) #'company-box-completing-read)
-            (window-configuration-change-hook nil)
-            (inhibit-redisplay t)
-            (display-buffer-alist nil)
-            (buffer-list-update-hook nil))
-    (-when-let* ((valid-state (and (eq (selected-frame) frame)
-                                   company-box--bottom
-                                   company-selection
-                                   (company-box--get-frame)
-                                   (frame-visible-p (company-box--get-frame))))
-                 (candidate (nth selection company-candidates))
-                 (doc (or (company-call-backend 'quickhelp-string candidate)
-                          (company-box-doc--fetch-doc-buffer candidate)))
-                 (doc (company-box-doc--make-buffer doc)))
-      (unless (frame-live-p (frame-local-getq company-box-doc-frame))
-        (frame-local-setq company-box-doc-frame (company-box-doc--make-frame doc)))
-      (company-box-doc--set-frame-position (frame-local-getq company-box-doc-frame))
-      (unless (frame-visible-p (frame-local-getq company-box-doc-frame))
-        (make-frame-visible (frame-local-getq company-box-doc-frame))))))
+  (company-box--with-no-redisplay
+    (cl-letf (((symbol-function 'completing-read) #'company-box-completing-read))
+      (-when-let* ((valid-state (and (eq (selected-frame) frame)
+                                     company-box--bottom
+                                     company-selection
+                                     (company-box--get-frame)
+                                     (frame-visible-p (company-box--get-frame))))
+                   (candidate (nth selection company-candidates))
+                   (doc (or (company-call-backend 'quickhelp-string candidate)
+                            (company-box-doc--fetch-doc-buffer candidate)))
+                   (doc (company-box-doc--make-buffer doc)))
+        (unless (frame-live-p (frame-local-getq company-box-doc-frame))
+          (frame-local-setq company-box-doc-frame (company-box-doc--make-frame doc)))
+        (company-box-doc--set-frame-position (frame-local-getq company-box-doc-frame))
+        (unless (frame-visible-p (frame-local-getq company-box-doc-frame))
+          (make-frame-visible (frame-local-getq company-box-doc-frame)))))))
 
 (defun company-box-completing-read (_prompt candidates &rest _)
   "`cider', and probably other libraries, prompt the user to
