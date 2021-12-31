@@ -264,13 +264,13 @@ Examples:
   "Execute BODY inside BUFFER and make sure disable read-only."
   (declare (indent 1) (debug t))
   `(with-current-buffer ,buffer
-     (let (buffer-read-only) (progn ,@body))))
+     (let (buffer-read-only) ,@body)))
 
-(defmacro company-box--with-buffer (object &rest body)
+(defmacro company-box--with-buffer (suffix &rest body)
   "Execute BODY inside buffer with SUFFIX."
   (declare (indent 1) (debug t))
-  `(company-box--with-buffer-valid (company-box--get-buffer ,object)
-     (progn ,@body)))
+  `(company-box--with-buffer-valid (company-box--get-buffer ,suffix)
+     ,@body))
 
 (defmacro company-box--with-buffer-window (suffix &rest body)
   "Execute BODY inside selected window with buffer SUFFIX."
