@@ -69,6 +69,7 @@
 (require 'company)
 (require 'frame-local)
 
+(require 'company-box-util)
 (require 'company-box-doc)
 (require 'company-box-icons)
 
@@ -259,24 +260,6 @@ Examples:
   (or (frame-local-getq company-box-buffer-id)
       (frame-local-setq company-box-buffer-id (or (frame-parameter nil 'window-id)
                                                   (frame-parameter nil 'name)))))
-
-(defmacro company-box--mute-apply (&rest body)
-  "Execute BODY without message."
-  (declare (indent 0) (debug t))
-  `(let (message-log-max)
-     (with-temp-message (or (current-message) nil)
-       (let ((inhibit-message t)) ,@body))))
-
-(defmacro company-box--with-no-redisplay (&rest body)
-  "Execute BODY without any redisplay execution."
-  (declare (indent 0) (debug t))
-  `(let ((inhibit-redisplay t)
-         (inhibit-modification-hooks t)
-         buffer-list-update-hook
-         display-buffer-alist
-         window-configuration-change-hook
-         after-focus-change-function)
-     ,@body))
 
 (defmacro company-box--with-buffer-valid (buffer &rest body)
   "Execute BODY inside BUFFER and make sure disable read-only."

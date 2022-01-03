@@ -38,6 +38,8 @@
 (require 'company)
 (require 'frame-local)
 
+(require 'company-box-util)
+
 (defgroup company-box-doc nil
   "Display documentation popups alongside company-box"
   :group 'company)
@@ -63,8 +65,6 @@
   "Frame parameters to use on the doc frame.
 `company-box-frame-parameters' is then append to this variable.")
 
-(declare-function company-box--mute-apply 'company-box)
-(declare-function company-box--with-no-redisplay 'company-box)
 (declare-function company-box--with-buffer-valid 'company-box)
 (declare-function company-box--with-buffer 'company-box)
 
