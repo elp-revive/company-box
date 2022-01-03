@@ -28,6 +28,7 @@
 ;;; Code:
 
 (require 'frame)
+(require 'subr-x)
 
 (defmacro company-box--mute-apply (&rest body)
   "Execute BODY without message."
