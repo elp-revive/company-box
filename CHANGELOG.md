@@ -11,7 +11,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 * N/A
 
 ## 0.2.0
-> Released Jan 1, 2022
+> Released Jan 3, 2022
 
 * Fix clean byte compile issue with `package.el`.
 * Drop support for Emacs `26.x`.
