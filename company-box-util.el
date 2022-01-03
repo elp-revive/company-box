@@ -27,7 +27,7 @@
 
 ;;; Code:
 
-(defvar after-focus-change-function)
+(require 'frame)
 
 (defmacro company-box--mute-apply (&rest body)
   "Execute BODY without message."
