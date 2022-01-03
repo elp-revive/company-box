@@ -261,29 +261,6 @@ Examples:
       (frame-local-setq company-box-buffer-id (or (frame-parameter nil 'window-id)
                                                   (frame-parameter nil 'name)))))
 
-(defmacro company-box--with-buffer-valid (buffer &rest body)
-  "Execute BODY inside BUFFER and make sure disable read-only."
-  (declare (indent 1) (debug t))
-  `(with-current-buffer ,buffer (let (buffer-read-only) ,@body)))
-
-(defmacro company-box--with-buffer (suffix &rest body)
-  "Execute BODY inside buffer with SUFFIX."
-  (declare (indent 1) (debug t))
-  `(company-box--with-buffer-valid (company-box--get-buffer ,suffix) ,@body))
-
-(defmacro company-box--with-buffer-window (suffix &rest body)
-  "Execute BODY inside selected window with buffer SUFFIX."
-  (declare (indent 1) (debug t))
-  `(when-let* ((buf-name (company-box--get-buffer ,suffix))
-               (window (get-buffer-window buf-name t))
-               ((window-live-p window)))
-     (with-selected-window window (let (buffer-read-only) ,@body))))
-
-(defmacro company-box--with-selected-frame (frame  &rest body)
-  "Execute BODY inside a selected frame."
-  (declare (indent 1) (debug t))
-  `(when-let (((frame-live-p frame))) (with-selected-frame frame ,@body)))
-
 (defun company-box--get-buffer (&optional suffix)
   "Construct the buffer name, it should be unique for each frame."
   (with-current-buffer
