@@ -65,9 +65,6 @@
   "Frame parameters to use on the doc frame.
 `company-box-frame-parameters' is then append to this variable.")
 
-(declare-function company-box--with-buffer-valid 'company-box)
-(declare-function company-box--with-buffer 'company-box)
-
 (declare-function company-box--get-frame 'company-box)
 (declare-function company-box--set-frame 'company-box)
 (declare-function company-box--get-buffer 'company-box)
