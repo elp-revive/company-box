@@ -8,7 +8,7 @@
 ;; URL: https://github.com/elp-revive/company-box
 ;; Keywords: company, completion, front-end, convenience
 ;; Package-Requires: ((emacs "27.1") (dash "2.18") (company "0.9.6") (frame-local "0.0.1"))
-;; Version: 0.1.1
+;; Version: 0.2.0
 
 ;;; License
 ;;
