@@ -69,7 +69,7 @@
 (defmacro company-box--with-selected-frame (frame  &rest body)
   "Execute BODY inside a selected frame."
   (declare (indent 1) (debug t))
-  `(when-let (((frame-live-p frame))) (with-selected-frame frame ,@body)))
+  `(when-let (((frame-live-p ,frame))) (with-selected-frame ,frame ,@body)))
 
 (provide 'company-box-util)
 ;;; company-box-util.el ends here
