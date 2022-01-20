@@ -768,8 +768,7 @@ It doesn't nothing if a font icon is used."
   "Delay show/hide frame to prevent GUI bug.
 
 Argument SHOW, see function `company-box--frame-show' description."
-  (when (timerp company-box--frame-show-timer)
-    (cancel-timer company-box--frame-show-timer))
+  (company-box--safe-kill-timer company-box--frame-show-timer)
   (setq company-box--frame-show-timer
         (run-with-idle-timer 0 nil #'company-box--frame-show show)))
 
@@ -1063,10 +1062,6 @@ COMMAND: See `company-frontends'."
         (company-box--compute-frame-position frame)
         (company-box--ensure-full-window-is-rendered)
         (company-box--update-frame-position frame)))))
-
-(defun company-box--kill-delay (buffer)
-  (when (buffer-live-p buffer)
-    (kill-buffer buffer)))
 
 (defun company-box--kill-buffer (frame)
   (company-box--kill-delay (frame-local-getq company-box-buffer frame))
