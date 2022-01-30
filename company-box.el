@@ -309,7 +309,7 @@ Examples:
     (unless buf
       (frame-local-setq company-box-window window))
     (set-window-dedicated-p window t)
-    (redirect-frame-focus frame (frame-parent frame))
+    ;;(redirect-frame-focus frame (frame-parent frame))
     (set-frame-parameter frame 'name "")
     frame))
 
