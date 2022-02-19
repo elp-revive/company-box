@@ -3,9 +3,9 @@ SHELL := /usr/bin/env bash
 EMACS ?= emacs
 CASK ?= cask
 
-PKG-FILES := ts-fold.el
+PKG-FILES := company-box.el
 
-TEST-FILES := $(shell ls test/ts-fold-*.el)
+TEST-FILES := $(shell ls test/company-box-*.el)
 
 .PHONY: clean checkdoc lint build compile unix-test
 
