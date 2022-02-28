@@ -117,7 +117,7 @@
         ((string (cond ((stringp object) object)
                        ((bufferp object) (company-box--with-buffer-valid object (buffer-string)))))
          (string (string-trim string))
-         (_valid (> (length string) 0)))
+         ((> (length string) 0)))
       (company-box--with-buffer "doc"
         (erase-buffer)
         (insert string)
