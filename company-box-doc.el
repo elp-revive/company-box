@@ -113,29 +113,25 @@
 (defun company-box-doc--make-buffer (object)
   "Create doc buffer."
   (company-box--with-no-redisplay
-    (let* ((string (cond ((stringp object) object)
-                         ((bufferp object) (company-box--with-buffer-valid object (buffer-string)))))
-           (string (string-trim string)))
-      (when (and string (> (length string) 0))
-        (company-box--with-buffer "doc"
-          (erase-buffer)
-          (insert string)
-          (let ((text-scale-mode-step 1.1))
-            (text-scale-set company-box-doc-text-scale-level))
-          (setq mode-line-format nil
-                display-line-numbers nil
-                header-line-format nil
-                tab-line-format nil
-                show-trailing-whitespace nil
-                cursor-in-non-selected-windows nil)
-          (let ((frame (company-box-doc--get-frame)))
-            (when (bound-and-true-p tab-bar-mode)
-              (set-frame-parameter frame 'tab-bar-lines 0))
-            (when (bound-and-true-p scroll-bar-mode)
-              (set-frame-parameter frame 'vertical-scroll-bars nil))
-            (when (bound-and-true-p horizontal-scroll-bar-mode)
-              (set-frame-parameter frame 'horizontal-scroll-bars nil)))
-          (current-buffer))))))
+    (when-let*
+        ((string (cond ((stringp object) object)
+                       ((bufferp object) (company-box--with-buffer-valid object (buffer-string)))))
+         (string (string-trim string))
+         (_valid (> (length string) 0)))
+      (company-box--with-buffer "doc"
+        (erase-buffer)
+        (insert string)
+        (let ((text-scale-mode-step 1.1))
+          (text-scale-set company-box-doc-text-scale-level))
+        (setq mode-line-format nil
+              display-line-numbers nil
+              header-line-format nil
+              tab-line-format nil
+              show-trailing-whitespace nil
+              cursor-in-non-selected-windows nil)
+        (when (bound-and-true-p tab-bar-mode)
+          (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
+        (current-buffer)))))
 
 (defun company-box-doc--make-frame (buffer)
   "Creat doc frame."
