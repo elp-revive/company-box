@@ -128,12 +128,13 @@
                 tab-line-format nil
                 show-trailing-whitespace nil
                 cursor-in-non-selected-windows nil)
-          (when (bound-and-true-p tab-bar-mode)
-            (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
-          (when (bound-and-true-p scroll-bar-mode)
-            (set-frame-parameter (company-box-doc--get-frame) 'vertical-scroll-bars  nil))
-          (when (bound-and-true-p horizontal-scroll-bar-mode)
-            (set-frame-parameter (company-box-doc--get-frame) 'horizontal-scroll-bars  nil))
+          (let ((frame (company-box-doc--get-frame)))
+            (when (bound-and-true-p tab-bar-mode)
+              (set-frame-parameter frame 'tab-bar-lines 0))
+            (when (bound-and-true-p scroll-bar-mode)
+              (set-frame-parameter frame 'vertical-scroll-bars nil))
+            (when (bound-and-true-p horizontal-scroll-bar-mode)
+              (set-frame-parameter frame 'horizontal-scroll-bars nil)))
           (current-buffer))))))
 
 (defun company-box-doc--make-frame (buffer)
