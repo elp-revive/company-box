@@ -61,7 +61,9 @@
   :group 'company-box-doc)
 
 (defvar company-box-doc-frame-parameters
-  '((internal-border-width  . 10))
+  '((internal-border-width  . 10)
+    (vertical-scroll-bars   . nil)
+    (horizontal-scroll-bars . nil))
   "Frame parameters to use on the doc frame.
 `company-box-frame-parameters' is then append to this variable.")
 
@@ -77,6 +79,7 @@
 (defvar-local company-box-doc--timer nil)
 
 (defun company-box-doc--fetch-doc-buffer (candidate)
+  "Return doc for CANDIDATE."
   (company-box--mute-apply
     (--> (while-no-input
            (-some-> (company-call-backend 'doc-buffer candidate)
