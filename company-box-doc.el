@@ -61,7 +61,7 @@
   :group 'company-box-doc)
 
 (defvar company-box-doc-frame-parameters
-  '((internal-border-width  . 1)
+  '((internal-border-width  . 10)
     (vertical-scroll-bars   . nil)
     (horizontal-scroll-bars . nil))
   "Frame parameters to use on the doc frame.
@@ -132,6 +132,7 @@
           (current-buffer))))))
 
 (defun company-box-doc--make-frame (buffer)
+  "Creat doc frame."
   (let* ((company-box-frame-parameters
           (append company-box-doc-frame-parameters
                   company-box-frame-parameters))
