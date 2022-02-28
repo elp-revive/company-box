@@ -61,9 +61,7 @@
   :group 'company-box-doc)
 
 (defvar company-box-doc-frame-parameters
-  '((internal-border-width  . 10)
-    (vertical-scroll-bars   . nil)
-    (horizontal-scroll-bars . nil))
+  '((internal-border-width  . 10))
   "Frame parameters to use on the doc frame.
 `company-box-frame-parameters' is then append to this variable.")
 
@@ -112,9 +110,9 @@
 (defun company-box-doc--make-buffer (object)
   "Create doc buffer."
   (company-box--with-no-redisplay
-    (let ((string (cond ((stringp object) object)
-                        ((bufferp object) (company-box--with-buffer-valid object (buffer-string))))))
-      (setq string (string-trim string))
+    (let* ((string (cond ((stringp object) object)
+                         ((bufferp object) (company-box--with-buffer-valid object (buffer-string)))))
+           (string (string-trim string)))
       (when (and string (> (length string) 0))
         (company-box--with-buffer "doc"
           (erase-buffer)
@@ -129,6 +127,10 @@
                 cursor-in-non-selected-windows nil)
           (when (bound-and-true-p tab-bar-mode)
             (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
+          (when (bound-and-true-p scroll-bar-mode)
+            (set-frame-parameter (company-box-doc--get-frame) 'vertical-scroll-bars  nil))
+          (when (bound-and-true-p horizontal-scroll-bar-mode)
+            (set-frame-parameter (company-box-doc--get-frame) 'horizontal-scroll-bars  nil))
           (current-buffer))))))
 
 (defun company-box-doc--make-frame (buffer)
