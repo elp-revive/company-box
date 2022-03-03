@@ -759,9 +759,10 @@ It doesn't nothing if a font icon is used."
   "If SHOW is non-nil, make the frame visible; otherwise make it invisible."
   (if-let* ((local-frame (company-box--get-frame))
             ((frame-live-p local-frame)))
-      (let ((frame-visible (frame-visible-p local-frame)))
-        (if show (unless frame-visible (make-frame-visible local-frame))
-          (when frame-visible (make-frame-invisible local-frame))))
+      (let ((visible (frame-visible-p local-frame))
+            (func (if show #'make-frame-visible #'make-frame-invisible)))
+        (unless (eq show visible)
+          (funcall func local-frame)))
     (unless local-frame
       (company-box--set-frame (company-box--make-frame)))
     (company-box--start-frame-timer show)))
@@ -1004,14 +1005,14 @@ Argument SHOW, see function `company-box--frame-show' description."
   (company-box--with-no-redisplay
     (-let* (((prefix common search length) company-box--state)
             (frame (company-box--get-frame))
-            (frame-visible (and (frame-live-p frame) (frame-visible-p frame))))
-      (if (and frame-visible
+            (visible (and (frame-live-p frame) (frame-visible-p frame))))
+      (if (and visible
                (equal search company-search-string)
                (equal length company-candidates-length)
                (string= company-prefix prefix)
                (string= company-common common))
           (company-box--move-selection)
-        (company-box-show frame-visible)))))
+        (company-box-show visible)))))
 
 (defun company-box--handle-scroll-parent (win new-start)
   (when (and (eq (frame-local-getq company-box-window-origin (company-box--get-frame)) win)
