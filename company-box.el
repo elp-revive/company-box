@@ -343,8 +343,12 @@ It doesn't nothing if a font icon is used."
 
 (defvar-local company-box--numbers-pos nil)
 
+(defun company-box--quick-access-margin ()
+  "Return quick access margin."
+  (if (eq company-show-quick-access 'left) 'left-margin 'right-margin))
+
 (defun company-box--remove-numbers (&optional side)
-  (let ((side (or side (if (eq company-show-quick-access 'left) 'left-margin 'right-margin)))
+  (let ((side (or side (company-box--quick-access-margin)))
         (max (point-max)))
     (--each company-box--numbers-pos
       (and (< it max)
@@ -354,8 +358,9 @@ It doesn't nothing if a font icon is used."
 
 (defun company-box--update-numbers (start)
   (company-box--with-no-redisplay
-    (let ((side (if (eq company-show-quick-access 'left) 'left-margin 'right-margin))
-          (offset (if (eq company-show-quick-access 'left) 0 10)))
+    (let* ((left-p (eq company-show-quick-access 'left))
+           (side (company-box--quick-access-margin))
+           (offset (if left-p 0 10)))
       (company-box--remove-numbers side)
       (dotimes (index 10)
         (-some--> start
@@ -423,8 +428,8 @@ It doesn't nothing if a font icon is used."
     (while (< start end)
       (-when-let* ((candidate (get-text-property start 'company-tooltip)))
         (aset vector index candidate)
-        (setq index (1+ index)))
-      (setq start (1+ start)))
+        (cl-incf index))
+      (cl-incf start))
     ;; Return nil when the vector is empty
     (and (aref vector 0) vector)))
 
@@ -683,7 +688,7 @@ It doesn't nothing if a font icon is used."
     string))
 
 (defun company-box--make-number-prop ()
-  (let ((side (if (eq company-show-quick-access 'left) 'left-margin 'right-margin)))
+  (let ((side (company-box--quick-access-margin)))
     (propertize " " 'company-box--number-pos t 'display `((margin ,side) "  "))))
 
 (defun company-box--make-line (candidate)
@@ -920,7 +925,7 @@ Argument SHOW, see function `company-box--frame-show' description."
          ((/= percent-display 1)
           (setq
            company-box--scrollbar-window
-           (with-selected-frame (company-box--get-frame)
+           (with-selected-frame frame
              (company-box--with-no-redisplay
                (let (window-scroll-functions)
                  (display-buffer-in-side-window
