@@ -74,9 +74,9 @@
 (defun company-box--kill-delay (buffer)
   (when (buffer-live-p buffer) (kill-buffer buffer)))
 
-(defun company-box--safe-kill-timer (timer)
+(defun company-box--kill-timer (timer)
   "Kill TIMER the safe way."
-  (when (timerp timer) (cancel-timer timer) (setf timer nil) timer))
+  (when (timerp timer) (cancel-timer timer)))
 
 (provide 'company-box-util)
 ;;; company-box-util.el ends here

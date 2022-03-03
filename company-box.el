@@ -288,6 +288,7 @@ Examples:
          (> spaces 1))))
 
 (defun company-box--make-scrollbar-parameter ()
+  "Return scroll-bar parameter."
   (cl-case company-box-scrollbar
     (`inherit (frame-parameter nil 'vertical-scroll-bars))
     (`left 'left)
@@ -296,12 +297,13 @@ Examples:
 (defun company-box--make-frame (&optional buf)
   (let* ((buffer (or buf (company-box--get-buffer)))
          after-make-frame-functions display-buffer-alist before-make-frame-hook
-         (params (append company-box-frame-parameters
-                         `((vertical-scroll-bars . ,(company-box--make-scrollbar-parameter))
-                           (default-minibuffer-frame . ,(selected-frame))
-                           (minibuffer . ,(minibuffer-window))
-                           (foreground-color . ,(face-foreground 'company-tooltip nil t))
-                           (background-color . ,(face-background 'company-tooltip nil t)))))
+         (params (append
+                  company-box-frame-parameters
+                  `((vertical-scroll-bars     . ,(company-box--make-scrollbar-parameter))
+                    (default-minibuffer-frame . ,(selected-frame))
+                    (minibuffer               . ,(minibuffer-window))
+                    (foreground-color         . ,(face-foreground 'company-tooltip nil t))
+                    (background-color         . ,(face-background 'company-tooltip nil t)))))
          (window (display-buffer-in-child-frame buffer `((child-frame-parameters . ,params))))
          (frame (window-frame window)))
     (frame-local-setq company-box-buffer buffer frame)
@@ -768,7 +770,7 @@ It doesn't nothing if a font icon is used."
   "Delay show/hide frame to prevent GUI bug.
 
 Argument SHOW, see function `company-box--frame-show' description."
-  (company-box--safe-kill-timer company-box--frame-show-timer)
+  (company-box--kill-timer company-box--frame-show-timer)
   (setq company-box--frame-show-timer
         (run-with-idle-timer 0 nil #'company-box--frame-show show)))
 
