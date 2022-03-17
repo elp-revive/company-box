@@ -6,3 +6,5 @@
  "company-box.el"
  "company-box-doc.el"
  "company-box-icons.el")
+
+(setq byte-compile-error-on-warn nil)
