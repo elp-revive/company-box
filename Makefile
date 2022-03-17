@@ -3,8 +3,6 @@ SHELL := /usr/bin/env bash
 EMACS ?= emacs
 EASK ?= eask
 
-PKG-FILES := company-box.el
-
 TEST-FILES := $(shell ls test/company-box-*.el)
 
 .PHONY: clean checkdoc lint install compile unix-test
