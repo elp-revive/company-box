@@ -12,9 +12,11 @@ TEST-FILES := $(shell ls test/company-box-*.el)
 ci: clean install compile
 
 install:
+	@echo "Installing..."
 	$(EASK) install
 
 compile:
+	@echo "Compiling..."
 	$(EASK) compile
 
 unix-test:
