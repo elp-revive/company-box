@@ -2,6 +2,7 @@
 /.git
 /recipes
 /test
+*-pkg.el
 
 # ignore generated files.
 *.elc
