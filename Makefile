@@ -11,6 +11,7 @@ ci: clean install compile
 
 install:
 	@echo "Installing..."
+    $(EASK) package
 	$(EASK) install
 
 compile:
