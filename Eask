@@ -5,6 +5,7 @@
 (package-file "company-box.el")
 (files "*.el" "images")
 
+(depends-on "emacs" "27.1")
 (depends-on "company")
 (depends-on "dash")
 (depends-on "frame-local")
