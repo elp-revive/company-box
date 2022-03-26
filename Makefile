@@ -7,11 +7,14 @@ TEST-FILES := $(shell ls test/company-box-*.el)
 
 .PHONY: clean checkdoc lint install compile unix-test
 
-ci: clean install compile
+ci: clean package install compile
+
+package:
+	@echo "Packaging..."
+	$(EASK) package
 
 install:
 	@echo "Installing..."
-	$(EASK) package
 	$(EASK) install
 
 compile:
