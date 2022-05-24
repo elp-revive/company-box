@@ -160,8 +160,8 @@
           (frame-local-setq company-box-doc-frame (company-box-doc--make-frame doc)))
         (company-box-doc--set-frame-position (frame-local-getq company-box-doc-frame))
         ;;(company-box-doc--show-frame t)
-		(unless (frame-visible-p (frame-local-getq company-box-doc-frame))
-          (make-frame-visible (frame-local-getq company-box-doc-frame)))))))))))
+(unless (frame-visible-p (frame-local-getq company-box-doc-frame))
+(make-frame-visible (frame-local-getq company-box-doc-frame)))))))
 
 (defun company-box-completing-read (_prompt candidates &rest _)
   "`cider', and probably other libraries, prompt the user to
