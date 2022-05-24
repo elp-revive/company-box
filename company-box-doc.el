@@ -185,7 +185,7 @@ just grab the first candidate and press forward."
   "Start the timer to SHOW frame."
   (company-box--start-frame-timer show (company-box-doc--get-frame) 'company-box-doc--frame-timer))
 
-(defun company-box-doc--hide (frame)
+(defun company-box-doc--hide (&rest _)
   "Hide the doc FRAME."
   (company-box-doc--show-frame nil))
 
