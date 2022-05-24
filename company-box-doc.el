@@ -77,11 +77,12 @@
 
 (defun company-box-doc--fetch-doc-buffer (candidate)
   "Return doc for CANDIDATE."
-  (company-box--mute-apply
-    (--> (while-no-input
-           (-some-> (company-call-backend 'doc-buffer candidate)
-             (get-buffer)))
-         (if (eq t it) nil it))))
+  (let (company-mode-hook)
+    (company-box--mute-apply
+      (--> (while-no-input
+             (-some-> (company-call-backend 'doc-buffer candidate)
+               (get-buffer)))
+           (if (eq t it) nil it)))))
 
 (defun company-box-doc--set-frame-position (frame)
   "Update frame position."
