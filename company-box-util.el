@@ -78,5 +78,16 @@
   "Kill TIMER the safe way."
   (when (timerp timer) (cancel-timer timer)))
 
+(defun company-box--frame-show (show frame)
+  "Show the frame if SHOW is non-nil; else we hide it."
+  (if-let (((frame-live-p frame)))
+      (let ((visible (frame-visible-p frame))
+            (func (if show #'make-frame-visible #'make-frame-invisible)))
+        (unless (eq show visible)
+          (funcall func frame)))
+    (unless frame
+      (company-box--set-frame (company-box--make-frame)))
+    (company-box--start-frame-timer show)))
+
 (provide 'company-box-util)
 ;;; company-box-util.el ends here

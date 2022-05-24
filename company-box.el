@@ -760,25 +760,13 @@ It doesn't nothing if a font icon is used."
 
 (defvar company-box--frame-show-timer nil)
 
-(defun company-box--frame-show (show)
-  "If SHOW is non-nil, make the frame visible; otherwise make it invisible."
-  (if-let* ((local-frame (company-box--get-frame))
-            ((frame-live-p local-frame)))
-      (let ((visible (frame-visible-p local-frame))
-            (func (if show #'make-frame-visible #'make-frame-invisible)))
-        (unless (eq show visible)
-          (funcall func local-frame)))
-    (unless local-frame
-      (company-box--set-frame (company-box--make-frame)))
-    (company-box--start-frame-timer show)))
-
 (defun company-box--start-frame-timer (show)
   "Delay show/hide frame to prevent GUI bug.
 
 Argument SHOW, see function `company-box--frame-show' description."
   (company-box--kill-timer company-box--frame-show-timer)
   (setq company-box--frame-show-timer
-        (run-with-idle-timer 0 nil #'company-box--frame-show show)))
+        (run-with-idle-timer 0 nil #'company-box--frame-show show (company-box--get-frame))))
 
 (defun company-box-hide ()
   "Hide the completion window."
