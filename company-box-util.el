@@ -2,8 +2,6 @@
 
 ;; Copyright (C) 2022 Jen-Chieh Shen
 
-;; Author: Jen-Chieh Shen <jcs090218@gmail.com>
-
 ;;; License
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -77,6 +75,23 @@
 (defun company-box--kill-timer (timer)
   "Kill TIMER the safe way."
   (when (timerp timer) (cancel-timer timer)))
+
+(defun company-box--frame-show (show frame timer)
+  "Show the frame if SHOW is non-nil; else we hide it."
+  (if-let (((frame-live-p frame)))
+      (let ((visible (frame-visible-p frame))
+            (func (if show #'make-frame-visible #'make-frame-invisible)))
+        (unless (eq show visible) (funcall func frame)))
+    (unless frame
+      (company-box--set-frame (company-box--make-frame)))
+    (company-box--start-frame-timer show frame timer)))
+
+(defun company-box--start-frame-timer (show frame timer)
+  "Delay show/hide frame to prevent GUI bug.
+
+Argument SHOW, see function `company-box--frame-show' description."
+  (company-box--kill-timer timer)
+  (set timer (run-with-idle-timer 0 nil #'company-box--frame-show show frame timer)))
 
 (provide 'company-box-util)
 ;;; company-box-util.el ends here

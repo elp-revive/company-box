@@ -8,7 +8,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## 0.2.1 (Unreleased)
 > Released N/A
 
-* N/A
+* Use frame timer to display `doc` as well (#8)
 
 ## 0.2.0
 > Released Jan 3, 2022

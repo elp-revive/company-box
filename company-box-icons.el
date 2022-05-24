@@ -3,9 +3,6 @@
 ;; Copyright (C) 2017 Sebastien Chapuis
 ;; Copyright (C) 2021-2022 Jen-Chieh Shen
 
-;; Author: Sebastien Chapuis <sebastien@chapu.is>
-;; Maintainer: Jen-Chieh Shen <jcs090218@gmail.com>
-
 ;;; License
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -272,8 +269,8 @@ the image.
     (6  . Variable)
     (7  . Class)
     (8  . Interface)
-    (9  . Property)
-    (10 . Module)
+    (9  . Module)
+    (10 . Property)
     (11 . Unit)
     (12 . Value)
     (13 . Enum)
@@ -299,7 +296,7 @@ Where KIND correspond to a number, the CompletionItemKind from the LSP [1]
 See `company-box-icons-images' or `company-box-icons-all-the-icons' for the
 ICON-TYPEs
 
-[1] https://github.com/Microsoft/language-server-protocol/blob/gh-pages/\
+[1] https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#completionItemKind\
 specification.md#completion-request-leftwards_arrow_with_hook.")
 
 (defconst company-box-icons--eglot-alist
