@@ -169,9 +169,8 @@ just grab the first candidate and press forward."
 
 (defun company-box-doc (selection frame)
   (when company-box-doc-enable
-    (company-box-doc--hide)
-    (when (timerp company-box-doc--timer)
-      (cancel-timer company-box-doc--timer))
+    (company-box-doc--hide frame)
+    (company-box--kill-timer company-box-doc--timer)
     (setq company-box-doc--timer
           (run-with-idle-timer
            company-box-doc-delay nil
@@ -185,9 +184,12 @@ just grab the first candidate and press forward."
   "Start the timer to SHOW frame."
   (company-box--start-frame-timer show (company-box-doc--get-frame) 'company-box-doc--frame-timer))
 
-(defun company-box-doc--hide (&rest _)
-  "Hide the doc frame."
-  (company-box-doc--show-frame nil))
+(defun company-box-doc--hide (frame)
+  "Hide the doc FRAME."
+  (company-box--kill-timer company-box-doc--frame-timer)
+  (when-let* ((local-frame (frame-local-getq company-box-doc-frame frame))
+              ((frame-visible-p local-frame)))
+    (make-frame-invisible local-frame)))
 
 (defun company-box-doc-manually ()
   (interactive)
