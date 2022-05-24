@@ -77,11 +77,17 @@
 
 (defun company-box-doc--fetch-doc-buffer (candidate)
   "Return doc for CANDIDATE."
-  (company-box--mute-apply
-    (--> (while-no-input
-           (-some-> (company-call-backend 'doc-buffer candidate)
-             (get-buffer)))
-         (if (eq t it) nil it))))
+  (let (company-mode-hook)
+    (company-box--mute-apply
+      (--> (while-no-input
+             ;; XXX: By calling `company-call-backend' with `doc-buffer' will
+             ;; enable `company-mode' once... not sure why!
+             ;;
+             ;; Let's temporarily set `company-mode-hook' to `nil' (on top) to
+             ;; prevent other possible side effects.
+             (-some-> (company-call-backend 'doc-buffer candidate)
+               (get-buffer)))
+           (if (eq t it) nil it)))))
 
 (defun company-box-doc--set-frame-position (frame)
   "Update frame position."
@@ -186,6 +192,8 @@ just grab the first candidate and press forward."
 
 (defun company-box-doc--hide (frame)
   "Hide the doc FRAME."
+  ;; TODO: we can't use `company-box-doc--show-frame' function here; it seems
+  ;; like it will enter an infinite loop and freezes Emacs.
   (company-box--kill-timer company-box-doc--frame-timer)
   (when-let* ((local-frame (frame-local-getq company-box-doc-frame frame))
               ((frame-visible-p local-frame)))
