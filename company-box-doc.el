@@ -190,6 +190,8 @@ just grab the first candidate and press forward."
 
 (defun company-box-doc--hide (frame)
   "Hide the doc FRAME."
+  ;; TODO: we can't use `company-box-doc--show-frame' function here; it seems
+  ;; like it will enter an infinite loop and freezes Emacs.
   (company-box--kill-timer company-box-doc--frame-timer)
   (when-let* ((local-frame (frame-local-getq company-box-doc-frame frame))
               ((frame-visible-p local-frame)))
