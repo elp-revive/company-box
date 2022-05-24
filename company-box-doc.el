@@ -3,9 +3,6 @@
 ;; Copyright (C) 2018 Sebastien Chapuis
 ;; Copyright (C) 2021-2022 Jen-Chieh Shen
 
-;; Author: Sebastien Chapuis <sebastien@chapu.is>
-;; Maintainer: Jen-Chieh Shen <jcs090218@gmail.com>
-
 ;;; License
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -162,8 +159,7 @@
         (unless (frame-live-p (frame-local-getq company-box-doc-frame))
           (frame-local-setq company-box-doc-frame (company-box-doc--make-frame doc)))
         (company-box-doc--set-frame-position (frame-local-getq company-box-doc-frame))
-        (unless (frame-visible-p (frame-local-getq company-box-doc-frame))
-          (make-frame-visible (frame-local-getq company-box-doc-frame)))))))
+        (company-box-doc--show-frame t)))))
 
 (defun company-box-completing-read (_prompt candidates &rest _)
   "`cider', and probably other libraries, prompt the user to
@@ -173,7 +169,7 @@ just grab the first candidate and press forward."
 
 (defun company-box-doc (selection frame)
   (when company-box-doc-enable
-    (company-box-doc--hide frame)
+    (company-box-doc--show-frame nil)
     (when (timerp company-box-doc--timer)
       (cancel-timer company-box-doc--timer))
     (setq company-box-doc--timer
@@ -183,11 +179,11 @@ just grab the first candidate and press forward."
              (company-box-doc--show selection frame)
              (company-ensure-emulation-alist))))))
 
-(defun company-box-doc--hide (frame)
-  "Hide the doc FRAME."
-  (when-let* ((local-frame (frame-local-getq company-box-doc-frame frame))
-              ((frame-visible-p local-frame)))
-    (make-frame-invisible local-frame)))
+(defvar company-box-doc--frame-timer nil)
+
+(defun company-box-doc--show-frame (show)
+  "Start the timer to SHOW frame."
+  (company-box--start-frame-timer show (company-box-doc--get-frame) 'company-box-doc--frame-timer))
 
 (defun company-box-doc-manually ()
   (interactive)

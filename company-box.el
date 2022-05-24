@@ -587,7 +587,7 @@ It doesn't nothing if a font icon is used."
   (company-box--compute-frame-position (company-box--get-frame))
   (company-box--move-selection t)
   (company-box--update-frame-position (company-box--get-frame))
-  (company-box--start-frame-timer t)
+  (company-box--show-frame t)
   (company-box--update-scrollbar (company-box--get-frame) t)
   (company-box--with-buffer nil
     (company-box--maybe-move-number (or company-box--last-start 1))))
@@ -758,15 +758,11 @@ It doesn't nothing if a font icon is used."
 
 (defvar company-box-hide-hook nil)
 
-(defvar company-box--frame-show-timer nil)
+(defvar company-box--frame-timer nil)
 
-(defun company-box--start-frame-timer (show)
-  "Delay show/hide frame to prevent GUI bug.
-
-Argument SHOW, see function `company-box--frame-show' description."
-  (company-box--kill-timer company-box--frame-show-timer)
-  (setq company-box--frame-show-timer
-        (run-with-idle-timer 0 nil #'company-box--frame-show show (company-box--get-frame))))
+(defun company-box--show-frame (show)
+  "Start the timer to SHOW frame."
+  (company-box--start-frame-timer show (company-box--get-frame) 'company-box--frame-timer))
 
 (defun company-box-hide ()
   "Hide the completion window."
@@ -775,7 +771,7 @@ Argument SHOW, see function `company-box--frame-show' description."
         company-box--prefix-pos nil
         company-box--last-start nil
         company-box--edges nil)
-  (company-box--start-frame-timer nil)
+  (company-box--show-frame nil)
   (company-box--with-buffer nil
     (setq company-box--last-start nil))
   (remove-hook 'window-scroll-functions 'company-box--handle-scroll-parent t)
