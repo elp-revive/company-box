@@ -80,9 +80,11 @@
   (let (company-mode-hook)
     (company-box--mute-apply
       (--> (while-no-input
-             ;; XXX: the following call will enable `company-mode' once again;
-             ;; set `company-mode-hook' to `nil' temporary to prevent other
-             ;; possible side effects.
+             ;; XXX: By calling `company-call-backend' with `doc-buffer' will
+             ;; enable `company-mode' once... not sure why!
+             ;;
+             ;; Let's temporarily set `company-mode-hook' to `nil' (on top) to
+             ;; prevent other possible side effects.
              (-some-> (company-call-backend 'doc-buffer candidate)
                (get-buffer)))
            (if (eq t it) nil it)))))
