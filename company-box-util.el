@@ -74,7 +74,10 @@
 
 (defun company-box--kill-timer (timer)
   "Kill TIMER the safe way."
-  (when (timerp timer) (cancel-timer timer)))
+  (when (timerp timer) (cancel-timer timer))
+  (when-let (((symbolp timer))
+             (val (ignore-errors (symbol-value timer))))
+    (cancel-timer val)))
 
 (defun company-box--frame-show (show frame timer)
   "Show the frame if SHOW is non-nil; else we hide it."
