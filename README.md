@@ -28,7 +28,7 @@ Also, not compatible with emacs in a tty.
     - [🌈 Backends colors](#🌈-backends-colors)
     - [Themes](#themes)
     - [Icons](#icons)
-    - [company-doc](#company-doc)
+    - [company-box-doc](#company-box-doc)
 
 <!-- markdown-toc end -->
 
