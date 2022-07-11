@@ -68,7 +68,7 @@ By default, images are used to display icons.
 You can also use [font icons](https://github.com/sebastiencs/company-box/wiki/icons)
 With images, you can't change icons colors
 
-## company-doc
+## company-box-doc
 
 Customization:
 
