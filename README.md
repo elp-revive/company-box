@@ -11,6 +11,7 @@ A company front-end with icons.
 ![company-box](etc/company-box.png)
 
 Differences with the built-in front-end:
+
 - Differents colors for differents backends.
 - Icons associated to functions/variables/.. and their backends
 - Display candidate's documentation (support `quickhelp-string`)
@@ -19,7 +20,19 @@ Differences with the built-in front-end:
 This package requires emacs 26.
 Also, not compatible with emacs in a tty.
 
-### Installation
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [company-box](#company-box)
+    - [💾 Installation](#💾-installation)
+    - [🌈 Backends colors](#🌈-backends-colors)
+    - [Themes](#themes)
+    - [Icons](#icons)
+    - [company-doc](#company-doc)
+
+<!-- markdown-toc end -->
+
+## 💾 Installation
 ``` el
 ;; With use-package:
 (use-package company-box
@@ -33,16 +46,16 @@ Also, not compatible with emacs in a tty.
 To customize:
 `M-x customize-group [RET] company-box [RET]`
 
-### Backends colors
+## 🌈 Backends colors
 
 See the docstring of the variable `company-box-backends-colors`:
 `C-h v company-box-backends-colors`
 
-### Themes
+## Themes
 
 You can select different themes with `company-box-icons-alist`
 
-### Icons
+## Icons
 
 See the variable `company-box-icons-functions`
 
@@ -54,3 +67,11 @@ Notes:
 By default, images are used to display icons.
 You can also use [font icons](https://github.com/sebastiencs/company-box/wiki/icons)
 With images, you can't change icons colors
+
+## company-doc
+
+Customization:
+
+* `company-box-doc-enable` enable company-box-doc
+* `company-box-doc-delay` Number of seconds before showing the doc
+* `company-box-doc-text-scale-level` Text scale amount for doc buffer
