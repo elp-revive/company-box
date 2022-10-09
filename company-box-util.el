@@ -28,13 +28,6 @@
 (require 'frame)
 (require 'subr-x)
 
-(defmacro company-box--mute-apply (&rest body)
-  "Execute BODY without message."
-  (declare (indent 0) (debug t))
-  `(let (message-log-max)
-     (with-temp-message (or (current-message) nil)
-       (let ((inhibit-message t)) ,@body))))
-
 (defmacro company-box--with-no-redisplay (&rest body)
   "Execute BODY without any redisplay execution."
   (declare (indent 0) (debug t))

@@ -7,7 +7,7 @@
 ;; Maintainer: Jen-Chieh Shen <jcs090218@gmail.com>
 ;; URL: https://github.com/elp-revive/company-box
 ;; Keywords: company, completion, front-end, convenience
-;; Package-Requires: ((emacs "27.1") (dash "2.18") (company "0.9.6") (frame-local "0.0.1"))
+;; Package-Requires: ((emacs "27.1") (dash "2.18") (company "0.9.6") (frame-local "0.0.1") (msgu "0.1.0"))
 ;; Version: 0.2.0
 
 ;;; License
@@ -68,6 +68,7 @@
 (require 'dash)
 (require 'company)
 (require 'frame-local)
+(require 'msgu)
 
 (require 'company-box-util)
 (require 'company-box-doc)

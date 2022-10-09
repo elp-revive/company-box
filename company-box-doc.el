@@ -84,7 +84,7 @@ Emacs frame."
 (defun company-box-doc--fetch-doc-buffer (candidate)
   "Return doc for CANDIDATE."
   (let (company-mode-hook)
-    (company-box--mute-apply
+    (msgu-silent
       (--> (while-no-input
              ;; XXX: By calling `company-call-backend' with `doc-buffer' will
              ;; enable `company-mode' once... not sure why!

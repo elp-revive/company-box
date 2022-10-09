@@ -8,11 +8,14 @@
 (package-file "company-box.el")
 (files "*.el" "images")
 
+(source "gnu")
+(source "jcs-elpa")
 (source "melpa")
 
 (depends-on "emacs" "27.1")
 (depends-on "company")
 (depends-on "dash")
 (depends-on "frame-local")
+(depends-on "msgu")
 
 (setq network-security-level 'low)  ; see https://github.com/jcs090218/setup-emacs-windows/issues/156#issuecomment-932956432
