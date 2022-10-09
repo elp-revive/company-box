@@ -1077,6 +1077,7 @@ COMMAND: See `company-frontends'."
   (frame-local-setq company-box--dimmer-parent nil))
 
 (defun company-box--handle-theme-change (&rest _)
+  "Handle theme changed."
   ;; Deleting frames will force to rebuild them from scratch
   ;; and use the correct new colors
   (company-box-doc--delete-frame)
@@ -1085,16 +1086,11 @@ COMMAND: See `company-frontends'."
 (defun company-box--tweak-external-packages ()
   (with-eval-after-load 'dimmer
     (when (boundp 'dimmer-prevent-dimming-predicates)
-      (add-to-list
-       'dimmer-prevent-dimming-predicates
-       'company-box--is-box-buffer))
+      (add-to-list 'dimmer-prevent-dimming-predicates 'company-box--is-box-buffer))
     (when (boundp 'dimmer-buffer-exclusion-predicates)
-      (add-to-list
-       'dimmer-buffer-exclusion-predicates
-       'company-box--is-box-buffer))
-    (advice-add 'load-theme :before 'company-box--handle-theme-change)
-    (advice-add 'company-box-show :before 'company-box--dimmer-show)
-    (advice-add 'company-box-hide :before 'company-box--dimmer-hide))
+      (add-to-list 'dimmer-buffer-exclusion-predicates 'company-box--is-box-buffer))
+    (advice-add 'company-box-show :before #'company-box--dimmer-show)
+    (advice-add 'company-box-hide :before #'company-box--dimmer-hide))
   (with-eval-after-load 'golden-ratio
     (when (boundp 'golden-ratio-exclude-buffer-regexp)
       (add-to-list 'golden-ratio-exclude-buffer-regexp " *company-box"))))
@@ -1115,7 +1111,8 @@ COMMAND: See `company-frontends'."
     (add-to-list 'company-frontends 'company-box-frontend)
     (unless (assq 'company-box-frame frameset-filter-alist)
       (push '(company-box-doc-frame . :never) frameset-filter-alist)
-      (push '(company-box-frame . :never) frameset-filter-alist)))
+      (push '(company-box-frame . :never) frameset-filter-alist))
+    (advice-add 'load-theme :before #'company-box--handle-theme-change))
    ((memq 'company-box-frontend company-frontends)
     (setq company-frontends (delq 'company-box-frontend  company-frontends))
     (add-to-list 'company-frontends 'company-pseudo-tooltip-unless-just-one-frontend))))
