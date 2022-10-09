@@ -1063,8 +1063,10 @@ COMMAND: See `company-frontends'."
     (company-box--set-frame nil)))
 
 (defun company-box--kill-buffer (frame)
-  (company-box--kill-delay (frame-local-getq company-box-buffer frame))
-  (company-box--kill-delay (frame-local-getq company-box-scrollbar frame)))
+  "Kill all buffers from FRAME."
+  (ignore-errors
+    (company-box--kill-delay (frame-local-getq company-box-buffer frame))
+    (company-box--kill-delay (frame-local-getq company-box-scrollbar frame))))
 
 (defun company-box--is-box-buffer (&optional buffer)
   (or (and buffer (eq buffer (frame-local-getq company-box--dimmer-parent (frame-parent))))
