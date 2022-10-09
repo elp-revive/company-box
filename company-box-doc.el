@@ -52,6 +52,12 @@
   :type 'number
   :group 'company-box-doc)
 
+(defcustom company-box-doc-no-wrap nil
+  "Specify whether or not to wrap the documentation box at the edge of the
+Emacs frame."
+  :type 'boolean
+  :group 'company-box-doc)
+
 (defcustom company-box-doc-text-scale-level 0
   "Text scale amount for doc buffer."
   :type 'integer
@@ -95,7 +101,16 @@
           (box-width (frame-pixel-width (company-box--get-frame)))
           (window (frame-root-window frame))
           (frame-resize-pixelwise t)
-          ((width . height) (window-text-pixel-size window nil nil 10000 10000))
+          ((width . height)
+           (if company-box-doc-no-wrap
+               (window-text-pixel-size window nil nil 10000 10000)
+             (window-text-pixel-size
+              window nil nil
+              ;; Use the widest space available (left or right of the box frame)
+              (let ((space-right (- (frame-native-width) (+ 40 (car box-position) box-width)))
+                    (space-left (- (car box-position) 40)))
+                (if (< space-right space-left) space-left space-right))
+              (- (frame-native-height) 40))))
           (bottom (+ company-box--bottom (window-pixel-top) (frame-border-width)))
           (x (+ (car box-position) box-width (/ (frame-char-width) 2)))
           (y (cdr box-position))
@@ -131,6 +146,7 @@
               header-line-format nil
               tab-line-format nil
               show-trailing-whitespace nil
+              truncate-lines nil
               cursor-in-non-selected-windows nil)
         (when (bound-and-true-p tab-bar-mode)
           (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
@@ -196,8 +212,16 @@ just grab the first candidate and press forward."
   ;; like it will enter an infinite loop and freezes Emacs.
   (company-box--kill-timer company-box-doc--frame-timer)
   (when-let* ((local-frame (frame-local-getq company-box-doc-frame frame))
+              ((frame-live-p local-frame))
               ((frame-visible-p local-frame)))
     (make-frame-invisible local-frame)))
+
+(defun company-box-doc--delete-frame ()
+  "Delete the child frame if it exists."
+  (-when-let (frame (frame-local-getq company-box-doc-frame))
+    (and (frame-live-p frame)
+         (delete-frame frame))
+    (frame-local-setq company-box-doc-frame nil)))
 
 (defun company-box-doc-manually ()
   (interactive)

@@ -202,6 +202,7 @@ Examples:
     (horizontal-scroll-bars . nil)
     (left-fringe            . 0)
     (right-fringe           . 0)
+    (tab-bar-lines          . 0)
     (menu-bar-lines         . 0)
     (tool-bar-lines         . 0)
     (line-spacing           . 0)
@@ -250,7 +251,8 @@ Examples:
 
 (defun company-box--get-frame (&optional frame)
   "Return the company-box child frame on FRAME."
-  (frame-local-getq company-box-frame frame))
+  (let ((frame (frame-local-getq company-box-frame frame)))
+    (and (frame-live-p frame) frame)))
 
 (defsubst company-box--set-frame (frame)
   "Set the frame symbol ‘company-box-frame’ to FRAME."
@@ -481,8 +483,6 @@ It doesn't nothing if a font icon is used."
                 show-trailing-whitespace nil
                 company-box--parent-buffer buffer
                 cursor-in-non-selected-windows nil)
-          (when (bound-and-true-p tab-bar-mode)
-            (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
           (setq-local scroll-step 1
                       scroll-conservatively 100000
                       scroll-margin 0
@@ -863,8 +863,6 @@ It doesn't nothing if a font icon is used."
     ;; TODO: Don't know why, can't resize it to 1
     (setq-local window-min-width company-box-scrollbar-width
                 window-safe-min-width company-box-scrollbar-width)
-    (when (bound-and-true-p tab-bar-mode)
-      (set-frame-parameter (company-box-doc--get-frame) 'tab-bar-lines 0))
     ;; NOTE: If you try to display character smaller than certain threshold, it
     ;; will display entire character instead!
     ;;
@@ -1055,6 +1053,13 @@ COMMAND: See `company-frontends'."
         (company-box--ensure-full-window-is-rendered)
         (company-box--update-frame-position frame)))))
 
+(defun company-box--delete-frame ()
+  "Delete the child frame if it exists."
+  (-when-let (frame (company-box--get-frame))
+    (and (frame-live-p frame)
+         (delete-frame frame))
+    (company-box--set-frame nil)))
+
 (defun company-box--kill-buffer (frame)
   (company-box--kill-delay (frame-local-getq company-box-buffer frame))
   (company-box--kill-delay (frame-local-getq company-box-scrollbar frame)))
@@ -1069,6 +1074,12 @@ COMMAND: See `company-frontends'."
 (defun company-box--dimmer-hide (&rest _)
   (frame-local-setq company-box--dimmer-parent nil))
 
+(defun company-box--handle-theme-change (&rest _)
+  ;; Deleting frames will force to rebuild them from scratch
+  ;; and use the correct new colors
+  (company-box-doc--delete-frame)
+  (company-box--delete-frame))
+
 (defun company-box--tweak-external-packages ()
   (with-eval-after-load 'dimmer
     (when (boundp 'dimmer-prevent-dimming-predicates)
@@ -1079,25 +1090,12 @@ COMMAND: See `company-frontends'."
       (add-to-list
        'dimmer-buffer-exclusion-predicates
        'company-box--is-box-buffer))
+    (advice-add 'load-theme :before 'company-box--handle-theme-change)
     (advice-add 'company-box-show :before 'company-box--dimmer-show)
     (advice-add 'company-box-hide :before 'company-box--dimmer-hide))
   (with-eval-after-load 'golden-ratio
     (when (boundp 'golden-ratio-exclude-buffer-regexp)
       (add-to-list 'golden-ratio-exclude-buffer-regexp " *company-box"))))
-
-(defun company-box--enable-theme (&rest _)
-  "Update frame after theme changed."
-  (when (bound-and-true-p company-box-mode)
-    (when-let ((frame (company-box--get-frame)))
-      (with-selected-frame frame
-        (set-foreground-color (face-foreground 'company-tooltip nil t))
-        (set-background-color (face-background 'company-tooltip nil t))))
-    (when-let ((frame (company-box-doc--get-frame)))
-      (with-selected-frame frame
-        (when-let ((fg (assoc 'foreground-color company-box-doc-frame-parameters)))
-          (set-foreground-color (cdr fg)))
-        (when-let ((bg (assoc 'background-color company-box-doc-frame-parameters)))
-          (set-background-color (cdr bg)))))))
 
 (defun company-box--set-mode (&optional frame)
   "Initialize entry."
@@ -1115,8 +1113,7 @@ COMMAND: See `company-frontends'."
     (add-to-list 'company-frontends 'company-box-frontend)
     (unless (assq 'company-box-frame frameset-filter-alist)
       (push '(company-box-doc-frame . :never) frameset-filter-alist)
-      (push '(company-box-frame . :never) frameset-filter-alist))
-    (advice-add 'enable-theme :after #'company-box--enable-theme))
+      (push '(company-box-frame . :never) frameset-filter-alist)))
    ((memq 'company-box-frontend company-frontends)
     (setq company-frontends (delq 'company-box-frontend  company-frontends))
     (add-to-list 'company-frontends 'company-pseudo-tooltip-unless-just-one-frontend))))
