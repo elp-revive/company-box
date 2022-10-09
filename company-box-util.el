@@ -28,6 +28,9 @@
 (require 'frame)
 (require 'subr-x)
 
+(declare-function company-box--make-frame "company-box.el")
+(declare-function company-box--set-frame "company-box.el")
+
 (defmacro company-box--with-no-redisplay (&rest body)
   "Execute BODY without any redisplay execution."
   (declare (indent 0) (debug t))
