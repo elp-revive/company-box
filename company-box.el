@@ -232,6 +232,7 @@ Examples:
 (defvar-local company-box--scrollbar-window nil)
 (defvar-local company-box--parent-buffer nil)
 (defvar-local company-box--chunk-size 0)
+(defvar-local company-box--largest-line-height 0)
 
 (defconst company-box--numbers
   (let ((vec (make-vector 20 nil)))
@@ -280,7 +281,19 @@ Examples:
   ;; variable `company-box-frame-parameters'.
   ;;
   ;; We just use function `frame-char-height' instead of function `line-pixel-height'.
-  (frame-char-height frame))
+  (max (company-box--with-buffer nil company-box--largest-line-height)
+       (frame-char-height frame)))
+
+(defun company-box--record-largest-line-height ()
+  "Records the largest line height.
+
+This function is used to handle unicode that are larger than regular characters."
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (setq company-box--largest-line-height
+            (max company-box--largest-line-height (line-pixel-height)))
+      (forward-line 1))))
 
 (defun company-box--with-icons-p ()
   (let ((spaces (+ (- (current-column) (string-width company-prefix))
@@ -461,7 +474,8 @@ It doesn't nothing if a font icon is used."
                 (mapcar (-compose 'company-box--make-line 'company-box--make-candidate) it)
                 (mapconcat 'identity it "\n")))
          "\n")
-        (put-text-property start (point) 'company-box--rendered t)))))
+        (put-text-property start (point) 'company-box--rendered t)
+        (company-box--record-largest-line-height)))))
 
 (defun company-box--render-buffer (string on-update)
   (company-box--with-no-redisplay
@@ -555,12 +569,14 @@ It doesn't nothing if a font icon is used."
                  (if company-box--with-icons-p
                      (- p-x (* char-width (if (= company-box--space 2) 2 3)) space-numbers scrollbar-width)
                    (- p-x (if (= company-box--space 0) 0 char-width) space-numbers scrollbar-width)))))
-      (setq company-box--x (max (+ x left) 0)
+      (setq company-box--largest-line-height 0
+            company-box--x (max (+ x left) 0)
             company-box--top (+ y top)
             company-box--height height
             company-box--chunk-size (/ height char-height))
       (company-box--with-buffer nil
-        (setq company-box--x (max (+ x left) 0)
+        (setq company-box--largest-line-height 0
+              company-box--x (max (+ x left) 0)
               company-box--top (+ y top)
               company-box--height height
               company-box--chunk-size (/ height char-height))))))
