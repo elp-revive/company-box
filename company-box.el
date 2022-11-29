@@ -277,23 +277,18 @@ Examples:
 
 (defun company-box--line-height (&optional frame)
   "Return FRAME's line height."
-  ;; NOTE: We don't consider `line-spacing' since we already set it to 0 in
-  ;; variable `company-box-frame-parameters'.
-  ;;
-  ;; We just use function `frame-char-height' instead of function `line-pixel-height'.
   (max (company-box--with-buffer nil company-box--largest-line-height)
-       (frame-char-height frame)))
+       (frame-char-height frame)))  ; just in case
 
-(defun company-box--record-largest-line-height ()
-  "Records the largest line height.
+(defun company-box--record-largest-line-height (start end)
+  "Records the largest line height from START to END.
 
 This function is used to handle unicode that are larger than regular characters."
-  (save-excursion
-    (goto-char (point-min))
-    (while (not (eobp))
-      (setq company-box--largest-line-height
-            (max company-box--largest-line-height (line-pixel-height)))
-      (forward-line 1))))
+  (goto-char start)
+  (while (and (< (point) end) (not (eobp)))
+    (setq company-box--largest-line-height
+          (max company-box--largest-line-height (line-pixel-height)))
+    (forward-line 1)))
 
 (defun company-box--with-icons-p ()
   (let ((spaces (+ (- (current-column) (string-width company-prefix))
@@ -475,7 +470,7 @@ It doesn't nothing if a font icon is used."
                 (mapconcat 'identity it "\n")))
          "\n")
         (put-text-property start (point) 'company-box--rendered t)
-        (company-box--record-largest-line-height)))))
+        (company-box--record-largest-line-height start (point))))))
 
 (defun company-box--render-buffer (string on-update)
   (company-box--with-no-redisplay
