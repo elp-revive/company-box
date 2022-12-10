@@ -8,6 +8,8 @@
 (package-file "company-box.el")
 (files "*.el" "images")
 
+(script "test" "echo \"Error: no test specified\" && exit 1")
+
 (source "gnu")
 (source "jcs-elpa")
 (source "melpa")
