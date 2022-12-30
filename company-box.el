@@ -82,7 +82,7 @@
 (defface company-box-scrollbar
   '((t :inherit company-tooltip-selection))
   "Face used for the scrollbar.
-Only the 'background' color is used in this face."
+Only the `background' color is used in this face."
   :group 'company-box)
 
 (defcustom company-box-color-icon t
@@ -106,7 +106,9 @@ detected."
   :group 'company-box)
 
 (defcustom company-box-icons-functions
-  '(company-box-icons--yasnippet company-box-icons--lsp company-box-icons--eglot company-box-icons--elisp company-box-icons--acphp company-box-icons--cider)
+  '( company-box-icons--yasnippet
+     company-box-icons--lsp company-box-icons--eglot
+     company-box-icons--elisp company-box-icons--acphp company-box-icons--cider)
   "Functions to call on each candidate that should return an icon.
 The functions takes 1 parameter, the completion candidate.
 
@@ -115,10 +117,10 @@ An ICON can be either a SYMBOL, an IMAGE, a LIST, a STRING:
 
 - SYMBOL:  It is the name of the icon (from `company-box--icons-in-terminal').
 - IMAGE:   An image descriptor [1]
-           Example: '(image :type png :file \"/path/to/image.png\")
+           Example: `(image :type png :file \"/path/to/image.png\")
 - LIST:    The list is then `apply' to `company-box--icons-in-terminal'
            function.
-           Example: '(fa_icon :face some-face :foreground \"red\")
+           Example: `(fa_icon :face some-face :foreground \"red\")
 - STRING:  A simple string which is inserted, should be of length 1
 
 If a function returns nil, it call the next function in the list.
@@ -132,13 +134,13 @@ If all functions returns nil, `company-box-icons-unknown' is used.
   "Whether to draw the custom scrollbar or use default scrollbar.
 
 - t means uses the custom scrollbar
-- 'inherit uses same scrollbar than the current frame
-- 'left or 'right puts default scrollbars to the left or right
+- `inherit uses same scrollbar than the current frame
+- `left or `right puts default scrollbars to the left or right
 - nil means draw no scrollbar."
   :type '(choice (const :tag "Custom scrollbar" t)
-                 (const :tag "Inherit scrollbar" 'inherit)
-                 (const :tag "Default scrollbar on left" 'left)
-                 (const :tag "Default scrollbar on right" 'right)
+                 (const :tag "Inherit scrollbar" inherit)
+                 (const :tag "Default scrollbar on left" left)
+                 (const :tag "Default scrollbar on right" right)
                  (const :tag "No scrollbar" nil))
   :group 'company-box)
 
@@ -149,8 +151,8 @@ If all functions returns nil, `company-box-icons-unknown' is used.
 
 (defcustom company-box-frame-behavior 'default
   "Change frame position behavior."
-  :type '(choice (const :tag "Default" 'default)
-                 (const :tag "Follow point as you type" 'point))
+  :type '(choice (const :tag "Default" default)
+                 (const :tag "Follow point as you type" point))
   :group 'company-box)
 
 (defcustom company-box-icon-right-margin 0
@@ -186,7 +188,7 @@ COLOR can be a LIST or a STRING:
 
 Examples:
 
-'((company-yasnippet . (:candidate \"yellow\" :annotation some-face))
+`((company-yasnippet . (:candidate \"yellow\" :annotation some-face))
   (company-elisp . (:icon \"yellow\" :selected (:background \"orange\"
                                               :foreground \"black\")))
   (company-dabbrev . \"purple\"))")
@@ -821,13 +823,19 @@ It doesn't nothing if a font icon is used."
     (-let* ((frame (company-box--get-frame (frame-parent)))
             (window (frame-local-getq company-box-window (frame-parent)))
             (char-width (frame-char-width frame))
+            (current-width (frame-inner-width frame))
             ((start . end) (company-box--get-start-end-for-width window win-start))
             (width (+ (company-box--calc-len (window-buffer window) start end char-width)
                       (if (and (eq company-box-scrollbar t) (company-box--scrollbar-p frame)) (* 2 char-width) 0)
                       char-width))
             (width (max (min width
                              (* company-tooltip-maximum-width char-width))
-                        (* company-tooltip-minimum-width char-width)))
+                        (* company-tooltip-minimum-width char-width)
+                        (if (and company-tooltip-width-grow-only
+                                 ;; Will only be true when updating
+                                 (frame-visible-p frame))
+                            current-width
+                          0)))
             (diff (abs (- (frame-pixel-width frame) width)))
             (frame-width (frame-pixel-width (frame-parent)))
             (new-x (and (> (+ width company-box--x) frame-width)
