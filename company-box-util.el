@@ -80,7 +80,8 @@
   (if-let (((frame-live-p frame)))
       (let ((visible (frame-visible-p frame))
             (func (if show #'make-frame-visible #'make-frame-invisible)))
-        (unless (eq show visible) (funcall func frame)))
+        (unless (eq show visible) (funcall func frame))
+        (when show (raise-frame frame)))
     (unless frame
       (company-box--set-frame (company-box--make-frame)))
     (company-box--start-frame-timer show frame timer)))
