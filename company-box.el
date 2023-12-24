@@ -787,7 +787,7 @@ It doesn't nothing if a font icon is used."
         company-box--prefix-pos nil
         company-box--last-start nil
         company-box--edges nil)
-  (make-frame-invisible (company-box--get-frame))
+  (company-box--show-frame nil)
   (company-box--with-buffer nil
     (setq company-box--last-start nil))
   (remove-hook 'window-scroll-functions 'company-box--handle-scroll-parent t)
