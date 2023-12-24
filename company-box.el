@@ -761,7 +761,8 @@ It doesn't nothing if a font icon is used."
 (defun company-box-show (&optional on-update)
   "Show the completion window."
   (unless on-update
-    (make-frame-invisible (company-box--get-frame))
+    (when-let ((frame (company-box--get-frame)))
+      (make-frame-invisible frame))
     (setq company-box--parent-start (window-start))
     (add-hook 'window-scroll-functions 'company-box--handle-scroll-parent nil t))
   (company-box--save)
