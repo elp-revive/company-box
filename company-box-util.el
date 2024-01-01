@@ -1,6 +1,6 @@
 ;;; company-box-util.el --- Util for company-box  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022-2023 Jen-Chieh Shen
+;; Copyright (C) 2022-2024 Jen-Chieh Shen
 
 ;;; License
 ;;
