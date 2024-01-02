@@ -211,9 +211,7 @@ just grab the first candidate and press forward."
   ;; TODO: we can't use `company-box-doc--show-frame' function here; it seems
   ;; like it will enter an infinite loop and freezes Emacs.
   (company-box--kill-timer company-box-doc--frame-timer)
-  (when-let* ((local-frame (frame-local-getq company-box-doc-frame frame))
-              ((frame-live-p local-frame))
-              ((frame-visible-p local-frame)))
+  (when-let ((local-frame (frame-local-getq company-box-doc-frame frame)))
     (make-frame-invisible local-frame)))
 
 (defun company-box-doc--delete-frame ()
