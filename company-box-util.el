@@ -28,18 +28,26 @@
 (require 'frame)
 (require 'subr-x)
 
+;;
+;;; Externals
+
 (declare-function company-box--make-frame "company-box.el")
 (declare-function company-box--set-frame "company-box.el")
+
+;;
+;;; Core
 
 (defmacro company-box--with-no-redisplay (&rest body)
   "Execute BODY without any redisplay execution."
   (declare (indent 0) (debug t))
   `(let ((inhibit-redisplay t)
          (inhibit-modification-hooks t)
+         after-focus-change-function
          buffer-list-update-hook
          display-buffer-alist
          window-configuration-change-hook
-         after-focus-change-function)
+         window-size-change-functions
+         window-state-change-hook)
      ,@body))
 
 (defmacro company-box--with-buffer-valid (buffer &rest body)

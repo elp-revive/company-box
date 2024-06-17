@@ -70,6 +70,9 @@ Emacs frame."
   "Frame parameters to use on the doc frame.
 `company-box-frame-parameters' is then append to this variable.")
 
+;;
+;;; Externals
+
 (declare-function company-box--get-frame 'company-box)
 (declare-function company-box--set-frame 'company-box)
 (declare-function company-box--get-buffer 'company-box)
@@ -81,9 +84,12 @@ Emacs frame."
 
 (defvar-local company-box-doc--timer nil)
 
+;;
+;;; Core
+
 (defun company-box-doc--fetch-doc-buffer (candidate)
   "Return doc for CANDIDATE."
-  (let (company-mode-hook)
+  (let ((company-mode-hook))
     (msgu-silent
       (--> (while-no-input
              ;; XXX: By calling `company-call-backend' with `doc-buffer' will
@@ -154,9 +160,8 @@ Emacs frame."
 
 (defun company-box-doc--make-frame (buffer)
   "Creat doc frame."
-  (let* ((company-box-frame-parameters
-          (append company-box-doc-frame-parameters
-                  company-box-frame-parameters))
+  (let* ((company-box-frame-parameters (append company-box-doc-frame-parameters
+                                               company-box-frame-parameters))
          (frame (company-box--make-frame buffer)))
     ;;(set-face-background 'internal-border "white" frame)
     (set-frame-parameter frame 'name "")

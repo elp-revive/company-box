@@ -27,7 +27,6 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-
 ;;; Commentary:
 ;;
 ;; A company front-end
@@ -221,6 +220,9 @@ Examples:
     (no-special-glyphs      . t))
   "Frame parameters used to create the frame.")
 
+;;
+;;; Externals
+
 (defvar company-box-debug-scrollbar nil)
 
 (defvar-local company-box--ov nil)
@@ -235,6 +237,9 @@ Examples:
 (defvar-local company-box--parent-buffer nil)
 (defvar-local company-box--chunk-size 0)
 (defvar-local company-box--largest-line-height 0)
+
+;;
+;;; Core
 
 (defconst company-box--numbers
   (let ((vec (make-vector 20 nil)))
