@@ -35,7 +35,7 @@
 (declare-function company-box--set-frame "company-box.el")
 
 ;;
-;;; Core
+;;; Display
 
 (defmacro company-box--with-no-redisplay (&rest body)
   "Execute BODY without any redisplay execution."
@@ -49,6 +49,9 @@
          window-size-change-functions
          window-state-change-hook)
      ,@body))
+
+;;
+;;; Buffers
 
 (defmacro company-box--with-buffer-valid (buffer &rest body)
   "Execute BODY inside BUFFER and make sure disable read-only."
@@ -67,6 +70,28 @@
                (window (get-buffer-window buf-name t))
                ((window-live-p window)))
      (with-selected-window window (let (buffer-read-only) ,@body))))
+
+;;
+;;; Frames
+
+(defun company-box--frames ()
+  "Return a list of frames belong to this package."
+  (seq-filter (lambda (frame)
+                (when-let ((buffer (car (frame-parameter frame 'buffer-list))))
+                  (string-match-p (regexp-quote " *company-box-")
+                                  (buffer-name buffer))))
+              (frame-list)))
+
+(defun company-box--unused-frames ()
+  "Return a list of unused frames."
+  (seq-filter (lambda (frame)
+                (and (not (equal frame (company-box--get-frame)))
+                     (not (equal frame (company-box-doc--get-frame)))))
+              (company-box--frames)))
+
+(defun company-box--kill-unused-frames ()
+  "Delete unused frames."
+  (mapc #'delete-frame (company-box--unused-frames)))
 
 (defmacro company-box--with-selected-frame (frame  &rest body)
   "Execute BODY inside a selected frame."
@@ -89,7 +114,8 @@
       (let ((visible (frame-visible-p frame))
             (func (if show #'make-frame-visible #'make-frame-invisible)))
         (unless (eq show visible) (funcall func frame))
-        (when show (raise-frame frame)))
+        (if show (raise-frame frame)
+          (company-box--kill-unused-frames)))
     (unless frame
       (company-box--set-frame (company-box--make-frame)))
     (company-box--start-frame-timer show frame timer)))

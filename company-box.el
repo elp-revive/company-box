@@ -268,7 +268,8 @@ Examples:
   "Set the frame symbol ‘company-box-frame’ to FRAME."
   (frame-local-setq company-box-frame frame))
 
-(defun company-box--get-id nil
+(defun company-box--get-id ()
+  "Get frame id."
   (or (frame-local-getq company-box-buffer-id)
       (frame-local-setq company-box-buffer-id (or (frame-parameter nil 'window-id)
                                                   (frame-parameter nil 'name)))))
@@ -298,6 +299,7 @@ This function is used to handle unicode that are larger than regular characters.
     (forward-line 1)))
 
 (defun company-box--with-icons-p ()
+  "Return non-nil when with icons."
   (let ((spaces (+ (- (current-column) (string-width company-prefix))
                    (/ (or (car (nth 2 (posn-at-point (line-beginning-position)))) 0)
                       (frame-char-width))
@@ -335,10 +337,12 @@ This function is used to handle unicode that are larger than regular characters.
     frame))
 
 (defun company-box--get-ov ()
+  "Get overlay."
   (or company-box--ov
       (setq company-box--ov (make-overlay 1 1))))
 
 (defun company-box--get-ov-common ()
+  "Get common overlay."
   (or company-box--ov-common
       (setq company-box--ov-common (make-overlay 1 1))))
 
@@ -439,7 +443,6 @@ It doesn't nothing if a font icon is used."
         (overlay-put (company-box--get-ov) 'face `(:background ,(face-background color)))
         (overlay-put (company-box--get-ov-common) 'face 'company-tooltip-common-selection)
         (company-box--update-image color)))))
-
 
 (defun company-box--get-candidates-between (start end)
   (let ((index 0)
@@ -1095,13 +1098,16 @@ COMMAND: See `company-frontends'."
     (company-box--kill-delay (frame-local-getq company-box-scrollbar frame))))
 
 (defun company-box--is-box-buffer (&optional buffer)
+  "Return non-nil if BUFFER is a box buffer."
   (or (and buffer (eq buffer (frame-local-getq company-box--dimmer-parent (frame-parent))))
       (string-prefix-p " *company-box" (buffer-name (or buffer (window-buffer))))))
 
 (defun company-box--dimmer-show (&rest _)
+  "Call on dimmer show."
   (frame-local-setq company-box--dimmer-parent (window-buffer)))
 
 (defun company-box--dimmer-hide (&rest _)
+  "Call on dimmer hide."
   (frame-local-setq company-box--dimmer-parent nil))
 
 (defun company-box--handle-theme-change (&rest _)
@@ -1112,6 +1118,7 @@ COMMAND: See `company-frontends'."
   (company-box--delete-frame))
 
 (defun company-box--tweak-external-packages ()
+  "Tweak some external packages."
   (with-eval-after-load 'dimmer
     (when (boundp 'dimmer-prevent-dimming-predicates)
       (add-to-list 'dimmer-prevent-dimming-predicates 'company-box--is-box-buffer))
