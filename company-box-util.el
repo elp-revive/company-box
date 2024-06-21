@@ -33,6 +33,8 @@
 
 (declare-function company-box--make-frame "company-box.el")
 (declare-function company-box--set-frame "company-box.el")
+(declare-function company-box--get-frame "company-box.el")
+(declare-function company-box-doc--get-frame "company-box-doc.el")
 
 ;;
 ;;; Display
