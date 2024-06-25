@@ -195,6 +195,7 @@ just grab the first candidate and press forward."
   (car candidates))
 
 (defun company-box-doc (selection frame)
+  "Doc selection."
   (when company-box-doc-enable
     (company-box-doc--hide frame)
     (company-box--kill-timer company-box-doc--timer)
@@ -216,8 +217,9 @@ just grab the first candidate and press forward."
   ;; TODO: we can't use `company-box-doc--show-frame' function here; it seems
   ;; like it will enter an infinite loop and freezes Emacs.
   (company-box--kill-timer company-box-doc--frame-timer)
-  (when-let ((local-frame (frame-local-getq company-box-doc-frame frame)))
-    (make-frame-invisible local-frame)))
+  (when-let* ((local-frame (frame-local-getq company-box-doc-frame frame))
+              ((frame-live-p local-frame)))
+    (ignore-errors (make-frame-invisible local-frame))))
 
 (defun company-box-doc--delete-frame ()
   "Delete the child frame if it exists."

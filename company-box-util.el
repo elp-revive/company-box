@@ -91,7 +91,7 @@
                      (not (equal frame (company-box-doc--get-frame)))))
               (company-box--frames)))
 
-(defun company-box--kill-unused-frames ()
+(defun company-box--delete-unused-frames ()
   "Delete unused frames."
   (mapc #'delete-frame (company-box--unused-frames)))
 
@@ -117,7 +117,7 @@
             (func (if show #'make-frame-visible #'make-frame-invisible)))
         (unless (eq show visible) (funcall func frame))
         (if show (raise-frame frame)
-          (company-box--kill-unused-frames)))
+          (company-box--delete-unused-frames)))
     (unless frame
       (company-box--set-frame (company-box--make-frame)))
     (company-box--start-frame-timer show frame timer)))
