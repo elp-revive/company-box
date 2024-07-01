@@ -79,9 +79,7 @@
 (defun company-box--frames ()
   "Return a list of frames belong to this package."
   (seq-filter (lambda (frame)
-                (when-let ((buffer (car (frame-parameter frame 'buffer-list))))
-                  (string-match-p (regexp-quote " *company-box-")
-                                  (buffer-name buffer))))
+                (frame-parameter frame 'company-box))
               (frame-list)))
 
 (defun company-box--unused-frames ()

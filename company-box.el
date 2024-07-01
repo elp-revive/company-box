@@ -194,7 +194,8 @@ Examples:
 
 
 (defvar company-box-frame-parameters
-  '((left                   . -1)
+  '((company-box            . t)
+    (left                   . -1)
     (no-accept-focus        . t)
     (no-focus-on-map        . t)
     (min-width              . 0)
