@@ -76,23 +76,6 @@
 ;;
 ;;; Frames
 
-(defun company-box--frames ()
-  "Return a list of frames belong to this package."
-  (seq-filter (lambda (frame)
-                (frame-parameter frame 'company-box))
-              (frame-list)))
-
-(defun company-box--unused-frames ()
-  "Return a list of unused frames."
-  (seq-filter (lambda (frame)
-                (and (not (equal frame (company-box--get-frame)))
-                     (not (equal frame (company-box-doc--get-frame)))))
-              (company-box--frames)))
-
-(defun company-box--delete-unused-frames ()
-  "Delete unused frames."
-  (mapc #'delete-frame (company-box--unused-frames)))
-
 (defmacro company-box--with-selected-frame (frame  &rest body)
   "Execute BODY inside a selected frame."
   (declare (indent 1) (debug t))
@@ -114,18 +97,16 @@
       (let ((visible (frame-visible-p frame))
             (func (if show #'make-frame-visible #'make-frame-invisible)))
         (unless (eq show visible) (funcall func frame))
-        (if show (raise-frame frame)
-          (company-box--delete-unused-frames)))
-    (unless frame
-      (company-box--set-frame (company-box--make-frame)))
+        (when show (raise-frame frame)))
     (company-box--start-frame-timer show frame timer)))
 
 (defun company-box--start-frame-timer (show frame timer)
   "Delay show/hide frame to prevent GUI bug.
 
 Argument SHOW, see function `company-box--frame-show' description."
-  (company-box--kill-timer timer)
-  (set timer (run-with-idle-timer 0 nil #'company-box--frame-show show frame timer)))
+  (when frame
+    (company-box--kill-timer timer)
+    (set timer (run-with-idle-timer 0 nil #'company-box--frame-show show frame timer))))
 
 (provide 'company-box-util)
 ;;; company-box-util.el ends here
