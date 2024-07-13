@@ -948,6 +948,7 @@ It doesn't nothing if a font icon is used."
           (frame-local-setq company-box-scrollbar (window-buffer company-box--scrollbar-window) frame)))))))
 
 (defun company-box--point-at-line (&optional line start)
+  "Return the point at line."
   (save-excursion
     (goto-char (or start 1))
     (forward-line (or line company-selection 0))
@@ -959,21 +960,20 @@ It doesn't nothing if a font icon is used."
           (candidates-length company-candidates-length))
       (company-box--with-buffer-window nil
         (setq company-selection selection)
-        (company-box--with-no-redisplay
-          (let ((new-point (company-box--point-at-line selection)))
-            (cond ((and (> new-point 1) (null (get-text-property (1- new-point) 'company-box--rendered)))
-                   ;; When going backward, render lines not yet visible
-                   ;; This avoid to render the lines when it's already visible
-                   ;; causing window-start to jump
-                   (company-box--render-lines (1- new-point))
-                   (company-box--move-overlays selection))
-                  ((get-text-property new-point 'company-box--rendered)
-                   ;; Line is already rendered, just move overlays
-                   (company-box--move-overlays selection new-point))
-                  (t
-                   ;; Line is not rendered at point
-                   (company-box--render-lines new-point)
-                   (company-box--move-overlays selection)))))
+        (let ((new-point (company-box--point-at-line selection)))
+          (cond ((and (> new-point 1) (null (get-text-property (1- new-point) 'company-box--rendered)))
+                 ;; When going backward, render lines not yet visible
+                 ;; This avoid to render the lines when it's already visible
+                 ;; causing window-start to jump
+                 (company-box--render-lines (1- new-point))
+                 (company-box--move-overlays selection))
+                ((get-text-property new-point 'company-box--rendered)
+                 ;; Line is already rendered, just move overlays
+                 (company-box--move-overlays selection new-point))
+                (t
+                 ;; Line is not rendered at point
+                 (company-box--render-lines new-point)
+                 (company-box--move-overlays selection))))
         (when (equal selection (1- candidates-length))
           ;; Ensure window doesn't go past last candidate
           (--> (- company-box--chunk-size)
