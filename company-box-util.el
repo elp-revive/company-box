@@ -93,7 +93,7 @@
 
 (defun company-box--frame-show (show frame timer)
   "Show the frame if SHOW is non-nil; else we hide it."
-  (if-let (((frame-live-p frame)))
+  (if-let* (((frame-live-p frame)))
       (let ((visible (frame-visible-p frame))
             (func (if show #'make-frame-visible #'make-frame-invisible)))
         (unless (eq show visible) (funcall func frame))
