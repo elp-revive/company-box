@@ -223,7 +223,7 @@ just grab the first candidate and press forward."
 
 (defun company-box-doc--delete-frame ()
   "Delete the child frame if it exists."
-  (-when-let (frame (frame-local-getq company-box-doc-frame))
+  (-when-let* (frame (frame-local-getq company-box-doc-frame))
     (and (frame-live-p frame)
          (delete-frame frame))
     (frame-local-setq company-box-doc-frame nil)))

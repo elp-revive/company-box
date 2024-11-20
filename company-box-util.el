@@ -79,7 +79,7 @@
 (defmacro company-box--with-selected-frame (frame  &rest body)
   "Execute BODY inside a selected frame."
   (declare (indent 1) (debug t))
-  `(when-let (((frame-live-p ,frame))) (with-selected-frame ,frame ,@body)))
+  `(when-let* (((frame-live-p ,frame))) (with-selected-frame ,frame ,@body)))
 
 (defun company-box--kill-delay (buffer)
   (when (buffer-live-p buffer) (kill-buffer buffer)))
@@ -87,8 +87,8 @@
 (defun company-box--kill-timer (timer)
   "Kill TIMER the safe way."
   (when (timerp timer) (cancel-timer timer))
-  (when-let (((symbolp timer))
-             (val (ignore-errors (symbol-value timer))))
+  (when-let* (((symbolp timer))
+              (val (ignore-errors (symbol-value timer))))
     (cancel-timer val)))
 
 (defun company-box--frame-show (show frame timer)

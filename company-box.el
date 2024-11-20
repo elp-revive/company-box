@@ -770,7 +770,7 @@ It doesn't nothing if a font icon is used."
 (defun company-box-show (&optional on-update)
   "Show the completion window."
   (unless on-update
-    (when-let ((frame (company-box--get-frame)))
+    (when-let* ((frame (company-box--get-frame)))
       (make-frame-invisible frame))
     (setq company-box--parent-start (window-start))
     (add-hook 'window-scroll-functions 'company-box--handle-scroll-parent nil t))
@@ -1087,7 +1087,7 @@ COMMAND: See `company-frontends'."
 
 (defun company-box--delete-frame ()
   "Delete the child frame if it exists."
-  (-when-let (frame (company-box--get-frame))
+  (-when-let* (frame (company-box--get-frame))
     (and (frame-live-p frame)
          (delete-frame frame))
     (company-box--set-frame nil)))
