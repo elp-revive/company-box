@@ -1087,7 +1087,7 @@ COMMAND: See `company-frontends'."
 
 (defun company-box--delete-frame ()
   "Delete the child frame if it exists."
-  (-when-let* (frame (company-box--get-frame))
+  (-when-let (frame (company-box--get-frame))
     (and (frame-live-p frame)
          (delete-frame frame))
     (company-box--set-frame nil)))
