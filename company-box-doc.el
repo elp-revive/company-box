@@ -34,6 +34,7 @@
 (require 'dash)
 (require 'company)
 (require 'frame-local)
+(require 'msgu)
 
 (require 'company-box-util)
 
