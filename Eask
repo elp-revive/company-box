@@ -1,3 +1,5 @@
+;; -*- mode: eask; lexical-binding: t -*-
+
 (package "company-box"
          "0.2.0"
          "Company front-end with icons")
