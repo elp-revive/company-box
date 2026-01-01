@@ -1,7 +1,7 @@
 ;;; company-box-doc.el --- Company front-end  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Sebastien Chapuis
-;; Copyright (C) 2021-2024 Jen-Chieh Shen
+;; Copyright (C) 2021-2026 Jen-Chieh Shen
 
 ;;; License
 ;;
