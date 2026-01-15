@@ -1036,7 +1036,7 @@ It doesn't nothing if a font icon is used."
 (defun company-box--handle-scroll-parent (win new-start)
   (when (and (eq (frame-local-getq company-box-window-origin (company-box--get-frame)) win)
              (not (equal company-box--parent-start new-start)))
-    (company-box--on-start-change)
+    (ignore-errors (company-box--on-start-change))
     (setq company-box--parent-start new-start)))
 
 (defvar company-mouse-event)
